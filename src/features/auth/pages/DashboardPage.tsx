@@ -1,13 +1,16 @@
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
 
 export function DashboardPage() {
   const profile = useAuthStore((s) => s.profile);
   const signOut = useAuthStore((s) => s.signOut);
 
   return (
-    <div className="p-8">
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <main className="flex-1 p-8">
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-[--color-text-primary]">Dashboard</h1>
@@ -51,6 +54,7 @@ export function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+      </main>
     </div>
   );
 }
