@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { supabase } from '@/shared/lib/supabase';
+import {
+  isDevBypassEnabled,
+  getDevMockSession,
+  getDevMockProfile,
+} from '@/shared/lib/dev-bypass';
 
 export function useAuthBootstrap() {
   const setSession = useAuthStore((s) => s.setSession);
@@ -8,6 +13,13 @@ export function useAuthBootstrap() {
   const setHydrated = useAuthStore((s) => s.setHydrated);
 
   useEffect(() => {
+    if (isDevBypassEnabled()) {
+      setSession(getDevMockSession());
+      setProfile(getDevMockProfile());
+      setHydrated(true);
+      return;
+    }
+
     const initAuth = async () => {
       try {
         const {
