@@ -10,6 +10,7 @@
 | ID | Tarea | Completada | Nota |
 |----|-------|------------|------|
 | TASK-001 | Setup del proyecto: Vite + TS + Tailwind v4 + shadcn + ESLint + Husky | 2026-06-30 | Stack completo configurado, 19 componentes UI, estructura de carpetas |
+| TASK-001b | Schema BD: crear tablas + `equipment.physical_location` | 2026-06-30 | Scripts SQL en `supabase/migrations/`, RLS habilitado |
 | P0-001 | Git + .gitignore + ramas | 2026-06-30 | main (base estable), develop (HEAD trabajo) |
 
 ---
@@ -24,7 +25,6 @@
 
 | ID | Tarea | Prioridad | Módulo | Depende de |
 |----|-------|-----------|--------|------------|
-| TASK-001b | Migración BD: agregar `equipment.physical_location` | Alta | shared (BD) | TASK-001 |
 | TASK-002 | Integración Supabase: cliente, tipos generados, variables de entorno | Alta | shared | TASK-001b |
 | TASK-003 | AuthStore (Zustand) + flujo de login / logout / sesión persistente | Alta | auth | TASK-002 |
 | TASK-004 | Onboarding guiado: organización → sede 1 → staff (opcional) → equipos (opcional) | Alta | auth | TASK-003 |
@@ -46,7 +46,7 @@
 |----|-------|--------|------|
 | P0-001 | Git + .gitignore + ramas | ✅ Completada | |
 | P0-002 | CI/CD (GitHub Actions) | Pendiente | Requiere cuenta Git |
-| P0-003 | .env (variables Supabase) | Pendiente | Ya existe `.env.example` |
+| P0-003 | .env.local (variables Supabase) | ✅ Completada | `.env.local` creado con credenciales |
 | P0-004 | Deploy staging | Pendiente | Decidir provider post-proyecto |
 
 ---
