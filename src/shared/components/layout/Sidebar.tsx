@@ -1,4 +1,5 @@
 import { Thermometer, X } from 'lucide-react';
+import type { RefObject } from 'react';
 import { NavItems } from '@/shared/components/layout/NavItems';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
 import { cn } from '@/shared/lib/utils';
@@ -12,9 +13,10 @@ interface SidebarProps {
   onClose?: () => void;
   className?: string;
   label?: string;
+  closeButtonRef?: RefObject<HTMLButtonElement | null>;
 }
 
-export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, label }: SidebarProps) {
+export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, label, closeButtonRef }: SidebarProps) {
   const organization = useOrganizationStore((s) => s.organization);
 
   if (mode === 'drawer') {
@@ -44,7 +46,7 @@ export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, la
               </div>
               <span className="text-lg font-semibold tracking-tight">TempMonitor</span>
             </div>
-            {onClose && (
+            {onClose && isOpen && (
               <Button
                 type="button"
                 variant="ghost"
@@ -52,6 +54,7 @@ export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, la
                 onClick={onClose}
                 aria-label="Cerrar menú"
                 className="text-white hover:bg-[--color-slate-700]"
+                ref={closeButtonRef}
               >
                 <X className="h-5 w-5" />
               </Button>

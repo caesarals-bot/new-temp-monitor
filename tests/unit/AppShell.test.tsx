@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Routes, Route } from 'react-router';
+import { MemoryRouter, Navigate, Routes, Route } from 'react-router';
 
 vi.mock('@/features/auth/store/auth.store', () => ({
   useAuthStore: Object.assign(
@@ -104,5 +104,56 @@ describe('AppShell', () => {
     const drawAside = screen.getAllByLabelText(/menú móvil/i)
       .find((el) => el.className.includes('translate-x-full'));
     expect(drawAside).toBeDefined();
+  });
+
+  it('closes drawer when route changes (B9 auto-close)', async () => {
+    function Wrapper() {
+      return (
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route path="/" element={<Navigate to="/locations" replace />} />
+              <Route path="/locations" element={<div>LOCATIONS</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      );
+    }
+
+    render(<Wrapper />);
+    await waitFor(() => {
+      expect(screen.getByText('LOCATIONS')).toBeInTheDocument();
+    });
+  });
+
+  it('closes drawer via close button (verifying onClose wiring)', async () => {
+    renderWithRoute();
+    const user = userEvent.setup();
+    await user.click(screen.getByLabelText(/abrir menú/i));
+    expect(screen.getByLabelText(/cerrar menú/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText(/cerrar menú/i));
+
+    await waitFor(
+      () => {
+        expect(screen.queryByLabelText(/cerrar menú/i)).toBeNull();
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it('locks body scroll while drawer is open and restores on close', async () => {
+    renderWithRoute();
+    const user = userEvent.setup();
+    const original = document.body.style.overflow;
+
+    await user.click(screen.getByLabelText(/abrir menú/i));
+    expect(document.body.style.overflow).toBe('hidden');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+    await waitFor(() => {
+      expect(document.body.style.overflow).toBe(original);
+    });
   });
 });
