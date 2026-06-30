@@ -7,7 +7,7 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { DashboardPage } from '@/features/auth/pages/DashboardPage';
 import { OnboardingPage } from '@/features/auth/pages/OnboardingPage';
-import { AuthenticatedLayout } from '@/app/AuthenticatedLayout';
+import { AppShell } from '@/shared/components/layout/AppShell';
 import { RoutePlaceholder } from '@/shared/components/layout/RoutePlaceholder';
 
 function Providers({ children }: { children: React.ReactNode }) {
@@ -41,7 +41,7 @@ function Router() {
             path: '/',
             element: (
               <ProtectedRoute>
-                <AuthenticatedLayout />
+                <AppShell />
               </ProtectedRoute>
             ),
             children: [
