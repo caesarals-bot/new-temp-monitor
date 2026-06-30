@@ -30,6 +30,60 @@
 | ID | Origen | Nota |
 |----|--------|------|
 | H-001 | TASK-004 | Regenerar `src/shared/types/supabase.ts` desde Supabase para que la RPC `create_organization_with_owner` quede tipada. Hoy `auth.service.ts:21` usa `as string` para el retorno |
+| H-002 | TASK-005 | Anon key de Supabase fue referida textualmente en chat del agente. Rotar la key en Project Settings → API es opcional pero recomendable |
+
+---
+
+## Sesión 2026-06-30 (mañana): cierre
+
+### Método aplicado
+Metodologia "componente por componente con validacion visual entre bloques" acordada
+con Cesar al inicio de la sesion. Resultado: 17 commits granulares, 0 regresiones,
+bugs (sidebar mobile) detectados y arreglados en el momento por el usuario, no en QA
+posterior.
+
+### Bloques ejecutados
+- B-prep Bypass auth dev via env flag
+- B0  Router restructure
+- B1  useNavItems (hook puro)
+- B2  LocationSelector
+- B3  useIncidentStore (placeholder, no realtime)
+- B4  NavItems (renderiza items + badge)
+- B5  Sidebar (fixed)
+- B5.1 Bug fix: Sidebar visible en mobile + drawer mode preparado
+- B6  TopBar (hamburger + LocationSelector + user menu)
+- B7  AppShell (composicion Sidebar + TopBar + Outlet)
+- B8  Integrar AppShell en router (reemplaza AuthenticatedLayout)
+- B9  Drawer refinements (auto-close, ESC, body lock, focus)
+- B10 Badge realtime con mock dev-bypass (3 incidentes)
+- B11 Platform admin layout (segundo env flag)
+- B12 Code splitting con React.lazy
+- B13 CHANGELOG
+- B14 Lint fixes finales
+
+### Decisiones de diseno que quedan vivas
+- **AppShell posee el estado del drawer** (isOpen, openDrawer, closeDrawer). TopBar y
+  Sidebar reciben handlers via props. Esto facilita testing y reuso.
+- **Sidebar modo dual**: `mode='fixed'` (visible desktop) o `mode='drawer'` (mobile).
+  Mismo componente, distintos props. Boton X solo se renderiza cuando drawer abierto.
+- **NavItems acepta variant: 'light' | 'dark'** para evitar overrides CSS en sidebar oscuro.
+- **Platform Admin comparte AppShell** con items filtrados por `is_platform_admin`.
+  Mismo shell, distinto nav.
+- **dev-bypass es la fuente unica de mocks.** Cualquier dato falso (user, org, location,
+  incidents) viene de ahi. Cuando cerremos el bypass, todo cae a Supabase real.
+
+### Riesgos / pendientes tecnicos
+- **Realtime real de incidents**: useIncidentStore.subscribeRealtime(orgId) sigue
+  siendo noop. En TASK-010 (incidents + HACCP) se implementa con
+  `supabase.channel('incidents').on('postgres_changes')`.
+- **Codigo postal del Esquema** pendiente regenerar (H-001).
+- **Anon key** expuesta en chat de sesion (H-002). Recomendable rotar.
+- **CSS via tokens** - los valores `--color-*` son globales pero algunos componentes
+  usan clases Tailwind directamente (ej `bg-white`). Pendiente auditar para TASK-006+.
+
+### Siguiente tarea logica
+**TASK-006** (CRUD de sedes con limite por plan) ya tiene dependencias satisfechas:
+depende de TASK-005 (AppShell) y esta ya commiteada.
 
 ---
 
