@@ -1,8 +1,6 @@
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { LocationSelector } from '@/shared/components/layout/LocationSelector';
-import { NavItems } from '@/shared/components/layout/NavItems';
 
 export function DashboardPage() {
   const profile = useAuthStore((s) => s.profile);
@@ -17,17 +15,9 @@ export function DashboardPage() {
             Bienvenido, {profile?.full_name || profile?.email}
           </p>
         </div>
-        <LocationSelector />
         <Button variant="outline" onClick={() => signOut()}>
           Cerrar sesión
         </Button>
-      </div>
-
-      <div className="mb-8 w-full max-w-xs rounded-lg border border-[--color-border] bg-white p-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[--color-text-muted]">
-          Preview nav (B4)
-        </p>
-        <NavItems />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
