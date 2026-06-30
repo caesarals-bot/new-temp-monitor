@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { lazy, Suspense } from 'react';
 
 export const LazyLoginPage = lazy(() =>
