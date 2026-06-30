@@ -74,4 +74,20 @@ describe('dev-bypass', () => {
     expect(locations[0]?.name).toBe('Casa Central');
     expect(locations[1]?.name).toBe('Sucursal Norte');
   });
+
+  it('getDevMockIncidents returns 3 open incidents by default', async () => {
+    import.meta.env.VITE_DEV_BYPASS_AUTH = 'true';
+    const { getDevMockIncidents } = await import('@/shared/lib/dev-bypass');
+    const incidents = getDevMockIncidents();
+    expect(incidents).toHaveLength(3);
+    expect(incidents[0]?.status).toBe('open');
+    expect(incidents.every((i) => i.status === 'open')).toBe(true);
+  });
+
+  it('getDevMockIncidents respects custom count', async () => {
+    import.meta.env.VITE_DEV_BYPASS_AUTH = 'true';
+    const { getDevMockIncidents } = await import('@/shared/lib/dev-bypass');
+    expect(getDevMockIncidents(0)).toHaveLength(0);
+    expect(getDevMockIncidents(7)).toHaveLength(7);
+  });
 });

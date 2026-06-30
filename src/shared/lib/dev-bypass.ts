@@ -12,7 +12,7 @@
  */
 
 import type { Session, User } from '@supabase/supabase-js';
-import type { Organization, Location, Profile } from '@/shared/types/supabase';
+import type { Organization, Location, Profile, Incident } from '@/shared/types/supabase';
 
 export const isDevBypassEnabled = (): boolean => {
   return import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
@@ -92,4 +92,23 @@ export function getDevMockLocations(): Location[] {
 
 export function getDevMockActiveLocationId(): string {
   return DEV_LOC_1_ID;
+}
+
+const DEV_READING_ID = '00000000-0000-0000-0000-000000000200';
+
+export function getDevMockIncidents(count: number = 3): Incident[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `00000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`,
+    status: 'open' as const,
+    description: `Incidente mock #${i + 1}`,
+    action_taken: null,
+    resolved_by: null,
+    resolved_at: null,
+    reading_id: DEV_READING_ID,
+    created_at: '2026-06-30T12:00:00Z',
+  }));
+}
+
+export function getDevMockOpenIncidentCount(): number {
+  return 3;
 }
