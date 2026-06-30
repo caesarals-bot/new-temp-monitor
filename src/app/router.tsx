@@ -4,10 +4,7 @@ import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
 import { useOrganizationBootstrap } from '@/features/organizations/hooks/useOrganizationBootstrap';
 import { useIncidentsBootstrap } from '@/features/incidents/hooks/useIncidentsBootstrap';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
-import { LoginPage } from '@/features/auth/pages/LoginPage';
-import { RegisterPage } from '@/features/auth/pages/RegisterPage';
-import { DashboardPage } from '@/features/auth/pages/DashboardPage';
-import { OnboardingPage } from '@/features/auth/pages/OnboardingPage';
+import { LazyLoginPage, LazyRegisterPage, LazyOnboardingPage, LazyDashboardPage, RouteFallback } from '@/app/LazyPages';
 import { AppShell } from '@/shared/components/layout/AppShell';
 import { RoutePlaceholder } from '@/shared/components/layout/RoutePlaceholder';
 
@@ -18,6 +15,14 @@ function Providers({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function lazyElement(Lazy: React.LazyExoticComponent<React.ComponentType<unknown>>) {
+  return (
+    <React.Suspense fallback={<RouteFallback />}>
+      <Lazy />
+    </React.Suspense>
+  );
+}
+
 function Router() {
   return (
     <Providers>
@@ -25,17 +30,17 @@ function Router() {
         router={createBrowserRouter([
           {
             path: '/login',
-            element: <LoginPage />,
+            element: lazyElement(LazyLoginPage),
           },
           {
             path: '/register',
-            element: <RegisterPage />,
+            element: lazyElement(LazyRegisterPage),
           },
           {
             path: '/onboarding',
             element: (
               <ProtectedRoute requireOnboarding={false}>
-                <OnboardingPage />
+                {lazyElement(LazyOnboardingPage)}
               </ProtectedRoute>
             ),
           },
@@ -49,7 +54,7 @@ function Router() {
             children: [
               {
                 index: true,
-                element: <DashboardPage />,
+                element: lazyElement(LazyDashboardPage),
               },
               {
                 path: 'locations',
