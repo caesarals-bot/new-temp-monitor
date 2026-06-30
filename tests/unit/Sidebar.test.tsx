@@ -100,4 +100,54 @@ describe('Sidebar', () => {
     );
     expect(screen.getByLabelText(/navegación de la aplicación/i)).toBeInTheDocument();
   });
+
+  it('default mode (fixed) is hidden on mobile via hidden class', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+    const aside = screen.getByLabelText(/navegación de la aplicación/i);
+    expect(aside.className).toMatch(/\bhidden\b/);
+    expect(aside.className).toMatch(/\bmd:flex\b/);
+  });
+});
+
+describe('Sidebar - drawer mode', () => {
+  it('does not render visible content when isOpen=false', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar mode="drawer" isOpen={false} />
+      </MemoryRouter>
+    );
+    const aside = screen.getByLabelText(/navegación de la aplicación/i);
+    expect(aside.className).toMatch(/translate-x-full/);
+    expect(aside).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('renders visible and shows close button when isOpen=true', () => {
+    const onClose = vi.fn();
+    render(
+      <MemoryRouter>
+        <Sidebar mode="drawer" isOpen={true} onClose={onClose} />
+      </MemoryRouter>
+    );
+    const aside = screen.getByLabelText(/navegación de la aplicación/i);
+    expect(aside.className).toMatch(/translate-x-0/);
+    expect(aside).toHaveAttribute('aria-hidden', 'false');
+    expect(screen.getByLabelText(/cerrar menú/i)).toBeInTheDocument();
+  });
+
+  it('calls onClose when close button is clicked', async () => {
+    const onClose = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Sidebar mode="drawer" isOpen={true} onClose={onClose} />
+      </MemoryRouter>
+    );
+    await user.click(screen.getByLabelText(/cerrar menú/i));
+    expect(onClose).toHaveBeenCalledOnce();
+  });
 });
