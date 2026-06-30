@@ -1,27 +1,23 @@
 import { useAuthStore } from '@/features/auth/store/auth.store';
-import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { TopBar } from '@/shared/components/layout/TopBar';
 
 export function DashboardPage() {
   const profile = useAuthStore((s) => s.profile);
-  const signOut = useAuthStore((s) => s.signOut);
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-8">
-      <div className="mb-8 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-[--color-text-primary]">Dashboard</h1>
-          <p className="text-[--color-text-secondary]">
-            Bienvenido, {profile?.full_name || profile?.email}
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => signOut()}>
-          Cerrar sesión
-        </Button>
-      </div>
+      <div className="flex flex-1 flex-col">
+        <TopBar />
+        <main className="flex-1 p-8">
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-[--color-text-primary]">Dashboard</h1>
+            <p className="text-[--color-text-secondary]">
+              Bienvenido, {profile?.full_name || profile?.email}
+            </p>
+          </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -54,7 +50,8 @@ export function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
