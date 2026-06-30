@@ -6,22 +6,22 @@
 
 ## Identidad del Proyecto
 
-**Nombre:** TempMonitor  
-**Versión actual:** V1  
-**Tipo:** SaaS B2B Multi-Tenant — PWA  
-**Dominio:** Monitoreo de cadena de frío para industrias alimentaria y sanitaria (Chile, 2026)  
+**Nombre:** TempMonitor
+**Versión actual:** V1
+**Tipo:** SaaS B2B Multi-Tenant — PWA
+**Dominio:** Monitoreo de cadena de frío para industrias alimentaria y sanitaria (Chile, 2026)
 **Stack:** React 19 + TypeScript + Vite + Tailwind CSS v4 + React Router v7 (SPA) + Supabase
 
 ---
 
 ## Propietario del Proyecto
 
-**Rol:** César (Product Owner + Developer Lead)  
+**Rol:** César (Product Owner + Developer Lead)
 **Flujo de aprobación:** Claude propone tareas → César las aprueba → Claude las implementa → César las revisa
 
 ---
 
-## Identidad Visual — Propuesta A "Operational Calm"
+## Identidad Visual — "Operational Calm"
 
 ### Paleta de colores
 
@@ -101,7 +101,7 @@ Razón: el proyecto es un SaaS dashboard — no necesita SSR, ISR ni file-based 
 
 ### Decisión: Zustand (no Context API)
 
-Razón: el estado global de TempMonitor tiene tres dominios claros (auth/tenant, organización activa, sede activa) pero con un patrón de uso crítico — actualizaciones frecuentes vía Supabase Realtime (lecturas e incidentes llegando constantemente). Con Context API, cualquier cambio en el valor del contexto re-renderiza a _todos_ los componentes consumidores, sin importar qué porción del estado usan. En un dashboard con múltiples tarjetas de equipo suscritas a Realtime, eso degrada el rendimiento de forma perceptible.
+Razón: el estado global de TempMonitor tiene tres dominios claros (auth/tenant, organización activa, sede activa) pero con un patrón de uso crítico — actualizaciones frecuentes vía Supabase Realtime (lecturas e incidentes llegando constantemente). Con Context API, cualquier cambio en el valor del contexto re-renderiza a *todos* los componentes consumidores, sin importar qué porción del estado usan. En un dashboard con múltiples tarjetas de equipo suscritas a Realtime, eso degrada el rendimiento de forma perceptible.
 
 Zustand resuelve esto con selectores granulares: un componente que solo lee `activeLocation` no se re-renderiza cuando cambia `openIncidents`. Sin el boilerplate de Redux (no hay actions/reducers/dispatch ceremonioso), con DevTools compatibles, y con una curva de adopción mínima viniendo de Context.
 
@@ -164,7 +164,6 @@ tempmonitor/
 ├── .prettierrc
 ├── .husky/
 │   └── pre-commit
-├── tailwind.config.ts             # Tema custom sobre Tailwind v4
 ├── vite.config.ts
 ├── tsconfig.json
 └── package.json
@@ -180,16 +179,16 @@ Cada feature es un módulo autónomo. Un componente de `readings` no importa nad
 
 ### Clasificación de componentes
 
-**Nivel 1 — UI Primitivos** (`shared/components/ui/`)  
+**Nivel 1 — UI Primitivos** (`shared/components/ui/`)
 Vienen de shadcn/ui. No se modifican directamente. Si se necesita extender, se crea un wrapper en Nivel 2. Nunca llevan lógica de negocio.
 
-**Nivel 2 — Componentes compartidos** (`shared/components/`)  
+**Nivel 2 — Componentes compartidos** (`shared/components/`)
 Composiciones de Nivel 1 con estilos de TempMonitor. Pueden recibir props de configuración pero no consumen stores de la app. Ejemplos: `TemperatureCard`, `StatusBadge`, `IncidentAlert`.
 
-**Nivel 3 — Componentes de feature** (`features/*/components/`)  
+**Nivel 3 — Componentes de feature** (`features/*/components/`)
 Consumen stores de Zustand (vía selectores granulares), llaman hooks de la feature, coordinan lógica local. Nunca hacen llamadas directas a Supabase — eso va en servicios. Ejemplos: `ReadingForm`, `EquipmentList`, `IncidentResolutionModal`.
 
-**Nivel 4 — Pages / Route components** (`features/*/pages/` o directamente en router)  
+**Nivel 4 — Pages / Route components** (`features/*/pages/` o directamente en router)
 Composición de componentes de feature. Gestionan estado de carga y error de nivel de página. Definen los loaders de React Router si aplica.
 
 ### Reglas del ciclo de vida
@@ -442,17 +441,17 @@ pnpm lint-staged
 
 ## Alcance V1 — Módulos Confirmados
 
-| Módulo                      | Descripción                                                                                           | Estado      |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- | ----------- |
-| Auth + Onboarding           | Registro organización, perfil owner, wizard inicial guiado (sede → staff opcional → equipos opcional) | Por iniciar |
-| Gestión de sedes            | CRUD de locations con límite por plan                                                                 | Por iniciar |
-| Gestión de personal (staff) | CRUD de encargados de toma de temperatura, sin login propio                                           | Por iniciar |
-| Gestión de equipos          | CRUD de equipment con rangos térmicos, nombre y ubicación dentro de la sede                           | Por iniciar |
-| Registro de lecturas        | Form manual, historial, estado en tiempo real                                                         | Por iniciar |
-| Alertas e incidentes        | Detección automática, flujo HACCP de resolución                                                       | Por iniciar |
-| Reportes                    | Historial filtrable, exportación PDF                                                                  | Por iniciar |
-| Panel platform admin        | Vista global de organizaciones (super admin)                                                          | Por iniciar |
-| Preparación IoT             | Columnas en BD, flags en UI, sin integración real                                                     | Por iniciar |
+| Módulo                | Descripción                                                                                       | Estado      |
+| --------------------- | ------------------------------------------------------------------------------------------------- | ----------- |
+| Auth + Onboarding     | Registro organización, perfil owner, wizard inicial guiado (sede → staff opcional → equipos opcional) | Por iniciar |
+| Gestión de sedes      | CRUD de locations con límite por plan                                                               | Por iniciar |
+| Gestión de personal   | CRUD de encargados de toma de temperatura, sin login propio                                       | Por iniciar |
+| Gestión de equipos    | CRUD de equipment con rangos térmicos, nombre y ubicación dentro de la sede                       | Por iniciar |
+| Registro de lecturas  | Form manual, historial, estado en tiempo real                                                     | Por iniciar |
+| Alertas e incidentes | Detección automática, flujo HACCP de resolución                                                   | Por iniciar |
+| Reportes              | Historial filtrable, exportación PDF                                                               | Por iniciar |
+| Panel platform admin  | Vista global de organizaciones (super admin)                                                      | Por iniciar |
+| Preparación IoT       | Columnas en BD, flags en UI, sin integración real                                                 | Por iniciar |
 
 ### Fuera de alcance V1
 
@@ -462,44 +461,6 @@ pnpm lint-staged
 - App nativa móvil (iOS/Android)
 - Tests E2E (Playwright)
 - i18n / multi-idioma
-
----
-
-## Flujo de Trabajo — Sistema de Tareas
-
-### Formato de tarea
-
-```markdown
-## TASK-XXX — Nombre de la tarea
-
-**Módulo:** [auth | locations | equipment | readings | incidents | reports | platform-admin | shared]
-**Prioridad:** Alta / Media / Baja
-**Depende de:** TASK-YYY (si aplica)
-**Estimación:** S / M / L (Small ≤ 2h, Medium ≤ 4h, Large ≤ 8h)
-
-### Descripción
-
-Qué se construye y por qué.
-
-### Criterios de aceptación
-
-- [ ] Criterio verificable 1
-- [ ] Criterio verificable 2
-
-### Archivos afectados
-
-- src/features/xxx/...
-
-### Tests requeridos
-
-- Qué se debe testear en esta tarea
-```
-
-### Estados de una tarea
-
-`PROPUESTA` → `APROBADA` → `EN PROGRESO` → `EN REVISIÓN` → `COMPLETADA`
-
-Solo se trabaja una tarea a la vez. No se inicia la siguiente hasta que la anterior esté `COMPLETADA`.
 
 ---
 
@@ -525,24 +486,3 @@ La BD ya tiene las columnas necesarias (`is_iot_enabled`, `iot_device_id`, `sens
 - La UI muestra el badge "IoT" si `reading_type === 'iot'` (preparado para datos reales futuros).
 - El flag `is_iot_enabled` en equipment se muestra en la UI como "Preparado para sensor IoT".
 - No se implementa `useIotSimulator` en V1 — se documenta como TASK futura.
-
----
-
-## Próximas Tareas Propuestas (backlog inicial)
-
-| ID        | Tarea                                                                            | Prioridad | Módulo         |
-| --------- | -------------------------------------------------------------------------------- | --------- | -------------- |
-| TASK-001  | Setup del proyecto: Vite + TS + Tailwind v4 + shadcn + ESLint + Husky            | Alta      | shared         |
-| TASK-001b | Migración de schema: agregar `equipment.physical_location`                       | Alta      | shared (BD)    |
-| TASK-002  | Integración Supabase: cliente, tipos generados, variables de entorno             | Alta      | shared         |
-| TASK-003  | AuthStore (Zustand) + flujo de login / logout / sesión persistente               | Alta      | auth           |
-| TASK-004  | Onboarding guiado: organización → sede 1 → staff (opcional) → equipos (opcional) | Alta      | auth           |
-| TASK-005  | AppShell: Sidebar, TopBar, layout base con RBAC                                  | Alta      | shared         |
-| TASK-006  | CRUD de sedes con límite por plan                                                | Media     | locations      |
-| TASK-006b | CRUD de personal (staff) — encargados de toma de temperatura por sede            | Media     | staff          |
-| TASK-007  | CRUD de equipos con rangos térmicos, nombre y ubicación                          | Media     | equipment      |
-| TASK-008  | Formulario de registro de lectura manual                                         | Alta      | readings       |
-| TASK-009  | Dashboard de lecturas con estado en tiempo real (Supabase realtime)              | Alta      | readings       |
-| TASK-010  | Motor de detección de incidentes + flujo HACCP                                   | Alta      | incidents      |
-| TASK-011  | Panel de reportes con filtros y exportación PDF                                  | Media     | reports        |
-| TASK-012  | Panel de platform admin (super admin)                                            | Baja      | platform-admin |
