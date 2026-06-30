@@ -18,6 +18,10 @@ export const isDevBypassEnabled = (): boolean => {
   return import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
 };
 
+export const isDevPlatformAdminBypassEnabled = (): boolean => {
+  return import.meta.env.VITE_DEV_BYPASS_PLATFORM_ADMIN === 'true';
+};
+
 const DEV_USER_ID = '00000000-0000-0000-0000-000000000001';
 const DEV_ORG_ID = '00000000-0000-0000-0000-000000000010';
 const DEV_LOC_1_ID = '00000000-0000-0000-0000-000000000101';
@@ -51,9 +55,9 @@ export function getDevMockProfile(): Profile {
     id: DEV_USER_ID,
     email: 'dev@tempmonitor.local',
     full_name: 'Dev User',
-    organization_id: DEV_ORG_ID,
+    organization_id: isDevPlatformAdminBypassEnabled() ? null : DEV_ORG_ID,
     role: 'owner',
-    is_platform_admin: false,
+    is_platform_admin: isDevPlatformAdminBypassEnabled(),
     created_at: '2026-06-30T00:00:00Z',
   };
 }

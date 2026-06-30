@@ -90,4 +90,30 @@ describe('dev-bypass', () => {
     expect(getDevMockIncidents(0)).toHaveLength(0);
     expect(getDevMockIncidents(7)).toHaveLength(7);
   });
+
+  it('isDevPlatformAdminBypassEnabled reflects env flag', async () => {
+    import.meta.env.VITE_DEV_BYPASS_PLATFORM_ADMIN = 'true';
+    const { isDevPlatformAdminBypassEnabled } = await import('@/shared/lib/dev-bypass');
+    expect(isDevPlatformAdminBypassEnabled()).toBe(true);
+
+    import.meta.env.VITE_DEV_BYPASS_PLATFORM_ADMIN = 'false';
+    const { isDevPlatformAdminBypassEnabled: fn2 } = await import('@/shared/lib/dev-bypass');
+    expect(fn2()).toBe(false);
+  });
+
+  it('getDevMockProfile returns platform_admin when flag enabled', async () => {
+    import.meta.env.VITE_DEV_BYPASS_PLATFORM_ADMIN = 'true';
+    const { getDevMockProfile } = await import('@/shared/lib/dev-bypass');
+    const profile = getDevMockProfile();
+    expect(profile.is_platform_admin).toBe(true);
+    expect(profile.organization_id).toBeNull();
+  });
+
+  it('getDevMockProfile returns regular owner by default', async () => {
+    import.meta.env.VITE_DEV_BYPASS_PLATFORM_ADMIN = 'false';
+    const { getDevMockProfile } = await import('@/shared/lib/dev-bypass');
+    const profile = getDevMockProfile();
+    expect(profile.is_platform_admin).toBe(false);
+    expect(profile.organization_id).toBeTruthy();
+  });
 });

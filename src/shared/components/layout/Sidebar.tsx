@@ -1,7 +1,8 @@
-import { Thermometer, X } from 'lucide-react';
+import { Thermometer, Shield, X } from 'lucide-react';
 import type { RefObject } from 'react';
 import { NavItems } from '@/shared/components/layout/NavItems';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
+import { useAuthStore } from '@/features/auth/store/auth.store';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/components/ui/button';
 
@@ -18,6 +19,7 @@ interface SidebarProps {
 
 export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, label, closeButtonRef }: SidebarProps) {
   const organization = useOrganizationStore((s) => s.organization);
+  const isPlatformAdmin = useAuthStore((s) => s.profile?.is_platform_admin ?? false);
 
   if (mode === 'drawer') {
     return (
@@ -61,27 +63,36 @@ export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, la
             )}
           </div>
 
-          <div className="px-5 pb-4">
-            <p className="truncate text-xs font-medium uppercase tracking-wide text-[--color-slate-300]">
-              Organización
-            </p>
-            <p className="mt-1 truncate text-sm font-medium text-white">
-              {organization?.name ?? 'Sin organización'}
-            </p>
-          </div>
+          {!isPlatformAdmin && (
+            <div className="px-5 pb-4">
+              <p className="truncate text-xs font-medium uppercase tracking-wide text-[--color-slate-300]">
+                Organización
+              </p>
+              <p className="mt-1 truncate text-sm font-medium text-white">
+                {organization?.name ?? 'Sin organización'}
+              </p>
+            </div>
+          )}
 
           <div className="flex-1 overflow-y-auto px-3 py-2">
             <NavItems variant="dark" />
           </div>
 
           <div className="border-t border-[--color-slate-700] px-5 py-4">
-            <p className="text-xs text-[--color-slate-300]">
-              {organization?.plan_type === 'enterprise'
-                ? 'Plan Enterprise'
-                : organization?.plan_type === 'pro'
-                  ? 'Plan Pro'
-                  : 'Plan Basic'}
-            </p>
+            {isPlatformAdmin ? (
+              <div className="flex items-center gap-2 text-xs text-[--color-slate-300]">
+                <Shield className="h-3 w-3" aria-hidden="true" />
+                <span>Modo Platform Admin</span>
+              </div>
+            ) : (
+              <p className="text-xs text-[--color-slate-300]">
+                {organization?.plan_type === 'enterprise'
+                  ? 'Plan Enterprise'
+                  : organization?.plan_type === 'pro'
+                    ? 'Plan Pro'
+                    : 'Plan Basic'}
+              </p>
+            )}
           </div>
         </aside>
       </>
@@ -103,27 +114,36 @@ export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, la
         <span className="text-lg font-semibold tracking-tight">TempMonitor</span>
       </div>
 
-      <div className="px-5 pb-4">
-        <p className="truncate text-xs font-medium uppercase tracking-wide text-[--color-slate-300]">
-          Organización
-        </p>
-        <p className="mt-1 truncate text-sm font-medium text-white">
-          {organization?.name ?? 'Sin organización'}
-        </p>
-      </div>
+      {!isPlatformAdmin && (
+        <div className="px-5 pb-4">
+          <p className="truncate text-xs font-medium uppercase tracking-wide text-[--color-slate-300]">
+            Organización
+          </p>
+          <p className="mt-1 truncate text-sm font-medium text-white">
+            {organization?.name ?? 'Sin organización'}
+          </p>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto px-3 py-2">
         <NavItems variant="dark" />
       </div>
 
       <div className="border-t border-[--color-slate-700] px-5 py-4">
-        <p className="text-xs text-[--color-slate-300]">
-          {organization?.plan_type === 'enterprise'
-            ? 'Plan Enterprise'
-            : organization?.plan_type === 'pro'
-              ? 'Plan Pro'
-              : 'Plan Basic'}
-        </p>
+        {isPlatformAdmin ? (
+          <div className="flex items-center gap-2 text-xs text-[--color-slate-300]">
+            <Shield className="h-3 w-3" aria-hidden="true" />
+            <span>Modo Platform Admin</span>
+          </div>
+        ) : (
+          <p className="text-xs text-[--color-slate-300]">
+            {organization?.plan_type === 'enterprise'
+              ? 'Plan Enterprise'
+              : organization?.plan_type === 'pro'
+                ? 'Plan Pro'
+                : 'Plan Basic'}
+          </p>
+        )}
       </div>
     </aside>
   );

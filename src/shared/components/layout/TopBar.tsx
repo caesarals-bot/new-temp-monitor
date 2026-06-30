@@ -30,6 +30,7 @@ export function TopBar({ onMenuClick, className }: TopBarProps) {
 
   const displayName = profile?.full_name ?? profile?.email ?? 'Invitado';
   const initials = getInitials(profile?.full_name ?? profile?.email);
+  const isPlatformAdmin = profile?.is_platform_admin ?? false;
 
   return (
     <header
@@ -49,9 +50,11 @@ export function TopBar({ onMenuClick, className }: TopBarProps) {
         <Menu className="h-5 w-5" />
       </Button>
 
-      <div className="hidden md:block">
-        <LocationSelector />
-      </div>
+      {!isPlatformAdmin && (
+        <div className="hidden md:block">
+          <LocationSelector />
+        </div>
+      )}
 
       <div className="flex-1" />
 

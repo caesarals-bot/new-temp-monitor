@@ -110,3 +110,23 @@ describe('TopBar', () => {
     expect(signOutMock).toHaveBeenCalledOnce();
   });
 });
+
+describe('TopBar - platform admin', () => {
+  it('hides LocationSelector when is_platform_admin is true', () => {
+    mockProfile = {
+      id: 'u',
+      email: 'admin@tempmonitor.local',
+      full_name: 'Platform Admin',
+      organization_id: null,
+      role: 'owner',
+      is_platform_admin: true,
+    };
+    render(
+      <MemoryRouter>
+        <TopBar />
+      </MemoryRouter>
+    );
+    expect(screen.queryByText('Casa Central')).toBeNull();
+    expect(screen.getByText('Platform Admin')).toBeInTheDocument();
+  });
+});

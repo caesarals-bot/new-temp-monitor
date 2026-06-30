@@ -1,16 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-
-vi.mock('@/features/auth/store/auth.store', () => ({
-  useAuthStore: Object.assign(
-    (selector: (s: Record<string, unknown>) => unknown) =>
-      selector({
-        profile: { id: 'u', organization_id: 'org', role: 'owner', is_platform_admin: false },
-      }),
-    { getState: () => ({}) }
-  ),
-}));
 
 let mockOrg: Record<string, unknown> | null = {
   id: 'org-1',
@@ -22,11 +12,20 @@ let mockOrg: Record<string, unknown> | null = {
   created_by: 'u',
   created_at: '2026-06-30T00:00:00Z',
 };
+let mockPlatformAdmin = false;
 
 vi.mock('@/features/organizations/store/organization.store', () => ({
   useOrganizationStore: Object.assign(
     (selector: (s: Record<string, unknown>) => unknown) => selector({ organization: mockOrg }),
     { getState: () => ({ organization: mockOrg }) }
+  ),
+}));
+
+vi.mock('@/features/auth/store/auth.store', () => ({
+  useAuthStore: Object.assign(
+    (selector: (s: Record<string, unknown>) => unknown) =>
+      selector({ profile: { id: 'u', organization_id: 'org', role: 'owner', is_platform_admin: mockPlatformAdmin } }),
+    { getState: () => ({}) }
   ),
 }));
 
@@ -37,6 +36,20 @@ vi.mock('@/features/incidents/store/incident.store', () => ({
 }));
 
 import { Sidebar } from '@/shared/components/layout/Sidebar';
+
+beforeEach(() => {
+  mockPlatformAdmin = false;
+  mockOrg = {
+    id: 'org-1',
+    name: 'Empresa Demo',
+    business_type: 'restaurant',
+    status: 'active',
+    plan_type: 'pro',
+    max_locations: 3,
+    created_by: 'u',
+    created_at: '2026-06-30T00:00:00Z',
+  };
+});
 
 describe('Sidebar', () => {
   it('renders the brand name', () => {
@@ -149,5 +162,31 @@ describe('Sidebar - drawer mode', () => {
     );
     await user.click(screen.getByLabelText(/cerrar menú/i));
     expect(onClose).toHaveBeenCalledOnce();
+  });
+});
+
+describe('Sidebar - platform admin mode', () => {
+  it('hides organization block and shows Platform Admin footer', () => {
+    mockPlatformAdmin = true;
+    mockOrg = null;
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+    expect(screen.queryByText('Empresa Demo')).toBeNull();
+    expect(screen.queryByText(/^Organización$/)).toBeNull();
+    expect(screen.getByText('Modo Platform Admin')).toBeInTheDocument();
+  });
+
+  it('drawer mode also reflects platform admin footer', () => {
+    mockPlatformAdmin = true;
+    mockOrg = null;
+    render(
+      <MemoryRouter>
+        <Sidebar mode="drawer" isOpen={true} onClose={vi.fn()} />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Modo Platform Admin')).toBeInTheDocument();
   });
 });

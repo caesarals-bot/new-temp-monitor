@@ -24,7 +24,7 @@ export function ProtectedRoute({ children, requireOnboarding = true }: Protected
     return <Navigate to="/login" replace />;
   }
 
-  if (requireOnboarding && !profile?.organization_id) {
+  if (requireOnboarding && !profile?.organization_id && !profile?.is_platform_admin) {
     return <Navigate to="/onboarding" replace />;
   }
 
