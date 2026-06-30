@@ -11,9 +11,10 @@ interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
   className?: string;
+  label?: string;
 }
 
-export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className }: SidebarProps) {
+export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, label }: SidebarProps) {
   const organization = useOrganizationStore((s) => s.organization);
 
   if (mode === 'drawer') {
@@ -33,7 +34,7 @@ export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className }: 
             isOpen ? 'translate-x-0' : '-translate-x-full',
             className
           )}
-          aria-label="Navegación de la aplicación"
+          aria-label={label ?? 'Menú de navegación'}
           aria-hidden={!isOpen}
         >
           <div className="flex items-center justify-between px-5 py-5">
@@ -90,7 +91,7 @@ export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className }: 
         'hidden md:flex h-screen w-60 shrink-0 flex-col border-r border-[--color-slate-700] bg-[--color-slate-900] text-white',
         className
       )}
-      aria-label="Navegación de la aplicación"
+      aria-label={label ?? 'Navegación de la aplicación'}
     >
       <div className="flex items-center gap-2 px-5 py-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[--color-eucalyptus]">

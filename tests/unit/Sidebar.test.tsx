@@ -120,7 +120,7 @@ describe('Sidebar - drawer mode', () => {
         <Sidebar mode="drawer" isOpen={false} />
       </MemoryRouter>
     );
-    const aside = screen.getByLabelText(/navegación de la aplicación/i);
+    const aside = screen.getByLabelText(/menú de navegación/i);
     expect(aside.className).toMatch(/translate-x-full/);
     expect(aside).toHaveAttribute('aria-hidden', 'true');
   });
@@ -132,7 +132,7 @@ describe('Sidebar - drawer mode', () => {
         <Sidebar mode="drawer" isOpen={true} onClose={onClose} />
       </MemoryRouter>
     );
-    const aside = screen.getByLabelText(/navegación de la aplicación/i);
+    const aside = screen.getByLabelText(/menú de navegación/i);
     expect(aside.className).toMatch(/translate-x-0/);
     expect(aside).toHaveAttribute('aria-hidden', 'false');
     expect(screen.getByLabelText(/cerrar menú/i)).toBeInTheDocument();
