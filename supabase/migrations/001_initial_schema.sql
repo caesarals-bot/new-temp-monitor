@@ -1,35 +1,11 @@
 -- ============================================================================
 -- TempMonitor V1 — Schema Completo
 -- ============================================================================
--- Ejecutar en Supabase SQL Editor
+-- Ejecutar DESPUÉS de 000_cleanup.sql
 -- ============================================================================
 
--- 1. BORRAR TABLAS EXISTENTES (en orden inverso por dependencias)
 -- ============================================================================
-DROP TABLE IF EXISTS incidents CASCADE;
-DROP TABLE IF EXISTS temperature_readings CASCADE;
-DROP TABLE IF EXISTS staff CASCADE;
-DROP TABLE IF EXISTS equipment CASCADE;
-DROP TABLE IF EXISTS location_assignments CASCADE;
-DROP TABLE IF EXISTS locations CASCADE;
-DROP TABLE IF EXISTS profiles CASCADE;
-DROP TABLE IF EXISTS organizations CASCADE;
-
--- Eliminar tipos si existen
-DROP TYPE IF EXISTS business_type_enum CASCADE;
-DROP TYPE IF EXISTS plan_type_enum CASCADE;
-DROP TYPE IF EXISTS user_role_enum CASCADE;
-DROP TYPE IF EXISTS location_role_enum CASCADE;
-DROP TYPE IF EXISTS equipment_location_role_enum CASCADE;
-DROP TYPE IF EXISTS organization_status_enum CASCADE;
-DROP TYPE IF EXISTS incident_status_enum CASCADE;
-DROP TYPE IF EXISTS reading_type_enum CASCADE;
-
--- Eliminar funciones y triggers
-DROP FUNCTION IF EXISTS check_location_limit() CASCADE;
-
--- ============================================================================
--- 2. CREAR TIPOS ENUM
+-- 1. CREAR TIPOS ENUM
 -- ============================================================================
 
 CREATE TYPE business_type_enum AS ENUM ('restaurant', 'pharmacy', 'butcher_shop', 'supermarket', 'general');
@@ -37,12 +13,11 @@ CREATE TYPE plan_type_enum AS ENUM ('basic', 'pro', 'enterprise');
 CREATE TYPE organization_status_enum AS ENUM ('active', 'paused', 'suspended');
 CREATE TYPE user_role_enum AS ENUM ('owner', 'admin', 'manager', 'staff');
 CREATE TYPE location_role_enum AS ENUM ('manager', 'staff');
-CREATE TYPE organization_status AS ENUM ('active', 'paused', 'suspended');
 CREATE TYPE incident_status_enum AS ENUM ('open', 'resolved');
 CREATE TYPE reading_type_enum AS ENUM ('manual', 'iot');
 
 -- ============================================================================
--- 3. CREAR TABLAS
+-- 2. CREAR TABLAS
 -- ============================================================================
 
 -- organizations (Empresas / Tenants)
@@ -141,7 +116,7 @@ CREATE TABLE incidents (
 );
 
 -- ============================================================================
--- 4. CREAR ÍNDICES
+-- 3. CREAR ÍNDICES
 -- ============================================================================
 
 CREATE INDEX idx_profiles_organization ON profiles(organization_id);
@@ -156,7 +131,7 @@ CREATE INDEX idx_incidents_reading ON incidents(reading_id);
 CREATE INDEX idx_incidents_status ON incidents(status);
 
 -- ============================================================================
--- 5. CREAR FUNCIÓN check_location_limit (Trigger)
+-- 4. CREAR FUNCIÓN check_location_limit (Trigger)
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION check_location_limit()
@@ -166,17 +141,14 @@ DECLARE
     org_max_locations INTEGER;
     current_location_count INTEGER;
 BEGIN
-    -- Obtener el plan y límite de la organización
     SELECT plan_type, max_locations INTO org_plan, org_max_locations
     FROM organizations
     WHERE id = (SELECT organization_id FROM locations WHERE id = NEW.location_id);
 
-    -- Contar ubicaciones actuales
     SELECT COUNT(*) INTO current_location_count
     FROM locations
     WHERE organization_id = (SELECT organization_id FROM locations WHERE id = NEW.location_id);
 
-    -- Verificar si excede el límite
     IF current_location_count >= org_max_locations THEN
         RAISE EXCEPTION 'Has alcanzado el límite de % sede(s) para tu plan %', org_max_locations, org_plan;
     END IF;
@@ -185,17 +157,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- ============================================================================
--- 6. CREAR TRIGGER PARA check_location_limit
--- ============================================================================
-
 CREATE TRIGGER trg_check_location_limit
     BEFORE INSERT ON locations
     FOR EACH ROW
     EXECUTE FUNCTION check_location_limit();
 
 -- ============================================================================
--- 7. HABILITAR ROW LEVEL SECURITY (RLS)
+-- 5. HABILITAR ROW LEVEL SECURITY (RLS)
 -- ============================================================================
 
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
@@ -208,10 +176,10 @@ ALTER TABLE temperature_readings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE incidents ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
--- 8. POLÍTICAS RLS
+-- 6. POLÍTICAS RLS
 -- ============================================================================
 
--- organizations: usuarios ven solo su organización
+-- organizations
 CREATE POLICY "Users can view own organization"
     ON organizations FOR SELECT
     USING (auth.uid() = created_by OR EXISTS (
@@ -224,7 +192,7 @@ CREATE POLICY "Users can update own organization"
         SELECT 1 FROM profiles WHERE id = auth.uid() AND organization_id = organizations.id AND role IN ('owner', 'admin')
     ));
 
--- profiles: usuarios ven solo perfiles de su organización
+-- profiles
 CREATE POLICY "Users can view profiles in own organization"
     ON profiles FOR SELECT
     USING (organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid()));
@@ -233,7 +201,7 @@ CREATE POLICY "Users can update own profile"
     ON profiles FOR UPDATE
     USING (id = auth.uid());
 
--- locations: usuarios ven sedes de su organización
+-- locations
 CREATE POLICY "Users can view locations in own organization"
     ON locations FOR SELECT
     USING (organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid()));
@@ -243,7 +211,7 @@ CREATE POLICY "Admins can manage locations"
     USING (organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
         AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('owner', 'admin')));
 
--- location_assignments: usuarios ven asignaciones de su organización
+-- location_assignments
 CREATE POLICY "Users can view location assignments in own organization"
     ON location_assignments FOR SELECT
     USING (location_id IN (
@@ -252,7 +220,7 @@ CREATE POLICY "Users can view location assignments in own organization"
         WHERE p.id = auth.uid()
     ));
 
--- equipment: usuarios ven equipos de su organización
+-- equipment
 CREATE POLICY "Users can view equipment in own organization"
     ON equipment FOR SELECT
     USING (location_id IN (
@@ -269,7 +237,7 @@ CREATE POLICY "Admins can manage equipment"
         WHERE p.id = auth.uid() AND p.role IN ('owner', 'admin', 'manager')
     ));
 
--- staff: usuarios ven staff de su organización
+-- staff
 CREATE POLICY "Users can view staff in own organization"
     ON staff FOR SELECT
     USING (location_id IN (
@@ -286,7 +254,7 @@ CREATE POLICY "Admins can manage staff"
         WHERE p.id = auth.uid() AND p.role IN ('owner', 'admin', 'manager')
     ));
 
--- temperature_readings: usuarios ven lecturas de su organización
+-- temperature_readings
 CREATE POLICY "Users can view readings in own organization"
     ON temperature_readings FOR SELECT
     USING (equipment_id IN (
@@ -305,7 +273,7 @@ CREATE POLICY "Users can insert readings"
         WHERE p.id = auth.uid()
     ));
 
--- incidents: usuarios ven incidentes de su organización
+-- incidents
 CREATE POLICY "Users can view incidents in own organization"
     ON incidents FOR SELECT
     USING (reading_id IN (
@@ -327,10 +295,9 @@ CREATE POLICY "Managers can resolve incidents"
     ));
 
 -- ============================================================================
--- 9. CREAR FUNCIONES ÚTILES
+-- 7. FUNCIONES ÚTILES
 -- ============================================================================
 
--- Función para crear organization + profile owner en una transacción
 CREATE OR REPLACE FUNCTION create_organization_with_owner(
     p_org_name TEXT,
     p_business_type business_type_enum,
@@ -342,12 +309,10 @@ CREATE OR REPLACE FUNCTION create_organization_with_owner(
 DECLARE
     v_org_id UUID;
 BEGIN
-    -- Crear organización
     INSERT INTO organizations (name, business_type, plan_type, created_by)
     VALUES (p_org_name, p_business_type, p_plan_type, p_user_id)
     RETURNING id INTO v_org_id;
 
-    -- Crear perfil owner
     INSERT INTO profiles (id, email, full_name, organization_id, role)
     VALUES (p_user_id, p_owner_email, p_owner_full_name, v_org_id, 'owner');
 
@@ -356,10 +321,9 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
--- 10. VERIFICACIÓN
+-- 8. VERIFICACIÓN
 -- ============================================================================
 
--- Verificar que todas las tablas existen
 SELECT table_name FROM information_schema.tables
 WHERE table_schema = 'public'
 ORDER BY table_name;
