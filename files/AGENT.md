@@ -1,6 +1,6 @@
 # TempMonitor V1 — Agente de Proyecto
 
-> Fuente de verdad. Decisiones de arquitectura, flujo de trabajo y alcance. Se actualiza al cierre de cada tarea aprobada.
+> Fuente de verdad. Decisiones de arquitectura, flujo de trabajo y alcance. Se actualiza SOLO cuando César aprueba. El historial vive en `files/CHANGELOG.md`.
 
 ---
 
@@ -67,6 +67,16 @@ tests/unit/
 ```
 
 **Regla:** feature-first. Componentes de `readings` no importan de `incidents` directamente.
+
+---
+
+## Principios
+
+**SOLID:** Componentes responsabilidad única. Interfaces pequeñas. Dependencias via props/hooks.
+
+**Clean Code:** Funciones < 20 líneas. Nombres descriptivos. Comentarios "por qué" no "qué". DRY, KISS, YAGNI.
+
+**Componentes:** Máximo ~100 líneas. Si crece más, dividir.
 
 ---
 
