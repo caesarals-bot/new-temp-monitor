@@ -11,6 +11,7 @@
 |----|-------|------------|------|
 | TASK-001 | Setup del proyecto: Vite + TS + Tailwind v4 + shadcn + ESLint + Husky | 2026-06-30 | Stack completo configurado, 19 componentes UI, estructura de carpetas |
 | TASK-001b | Schema BD: crear tablas + `equipment.physical_location` | 2026-06-30 | Scripts SQL en `supabase/migrations/`, RLS habilitado |
+| TASK-002 | Integración Supabase: cliente, tipos, env validation | 2026-06-30 | Cliente singleton, tipos generados, validación Zod |
 | P0-001 | Git + .gitignore + ramas | 2026-06-30 | main (base estable), develop (HEAD trabajo) |
 
 ---
@@ -25,7 +26,6 @@
 
 | ID | Tarea | Prioridad | Módulo | Depende de |
 |----|-------|-----------|--------|------------|
-| TASK-002 | Integración Supabase: cliente, tipos generados, variables de entorno | Alta | shared | TASK-001b |
 | TASK-003 | AuthStore (Zustand) + flujo de login / logout / sesión persistente | Alta | auth | TASK-002 |
 | TASK-004 | Onboarding guiado: organización → sede 1 → staff (opcional) → equipos (opcional) | Alta | auth | TASK-003 |
 | TASK-005 | AppShell: Sidebar, TopBar, layout base con RBAC | Alta | shared | TASK-003 |
