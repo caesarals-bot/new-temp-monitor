@@ -1,13 +1,15 @@
 import * as React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireOnboarding?: boolean;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requireOnboarding = true }: ProtectedRouteProps) {
   const session = useAuthStore((s) => s.session);
+  const profile = useAuthStore((s) => s.profile);
   const isHydrated = useAuthStore((s) => s.isHydrated);
 
   if (!isHydrated) {
@@ -20,6 +22,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!session) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (requireOnboarding && !profile?.organization_id) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <>{children}</>;

@@ -5,95 +5,58 @@
   --color-slate-900: #1c2b35;
   --color-slate-700: #2d4455;
   --color-slate-500: #4a6070;
+  --color-slate-300: #8ba3b0;
   --color-eucalyptus: #2e7d6b;
+  --color-eucalyptus-hover: #266b5a;
   --color-eucalyptus-light: #5bbfa8;
+  --color-eucalyptus-subtle: #adddd4;
   --color-eucalyptus-bg: #e8f5f2;
   --color-surface: #f0f4f3;
+  --color-surface-card: #ffffff;
+  --color-surface-raised: #ffffff;
   --color-white: #ffffff;
   --color-border: #d8e6e2;
   --color-border-strong: #b8d4ce;
+  --color-border-focus: #2e7d6b;
+  --color-text-primary: #1c2b35;
+  --color-text-secondary: #4a6070;
+  --color-text-muted: #8ba3b0;
+  --color-text-inverse: #ffffff;
 
   /* Semantic Colors */
   --color-danger: #e8533a;
+  --color-danger-hover: #d4442c;
+  --color-danger-light: #f4957f;
   --color-danger-bg: #fdf0ed;
+  --color-danger-border: #f4c4b9;
   --color-warning: #d97706;
+  --color-warning-light: #f5b84c;
   --color-warning-bg: #fef9ec;
+  --color-warning-border: #fad98c;
+  --color-success: #2e7d6b;
+  --color-success-bg: #e8f5f2;
 
   /* Font Families */
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-}
-:root {
-  /* Slate — estructura y navegación */
-  --color-slate-900: #1C2B35;
-  --color-slate-700: #2D4455;
-  --color-slate-500: #4A6070;
-  --color-slate-300: #8BA3B0;
-
-  /* Eucalyptus — acento primario, acciones, estados OK */
-  --color-eucalyptus:        #2E7D6B;
-  --color-eucalyptus-hover:  #266B5A;
-  --color-eucalyptus-light:  #5BBFA8;
-  --color-eucalyptus-subtle: #A8DDD4;
-  --color-eucalyptus-bg:     #E8F5F2;
-
-  /* Superficies */
-  --color-surface:      #F0F4F3;
-  --color-surface-card: #FFFFFF;
-  --color-surface-raised: #FFFFFF;
-
-  /* Bordes */
-  --color-border:        #D8E6E2;
-  --color-border-strong: #B8D4CE;
-  --color-border-focus:  #2E7D6B;
-
-  /* Texto */
-  --color-text-primary:   #1C2B35;
-  --color-text-secondary: #4A6070;
-  --color-text-muted:     #8BA3B0;
-  --color-text-inverse:   #FFFFFF;
-
-  /* Semánticos — SOLO para estados funcionales */
-  --color-danger:         #E8533A;
-  --color-danger-hover:   #D4442C;
-  --color-danger-light:   #F4957F;
-  --color-danger-bg:      #FDF0ED;
-  --color-danger-border:  #F4C4B9;
-
-  --color-warning:        #D97706;
-  --color-warning-light:  #F5B84C;
-  --color-warning-bg:     #FEF9EC;
-  --color-warning-border: #FAD98C;
-
-  --color-success:        #2E7D6B;   /* alias de eucalyptus */
-  --color-success-bg:     #E8F5F2;
-
-  /* Tipografía */
-  --font-sans:  'Inter', system-ui, sans-serif;
-  --font-mono:  'JetBrains Mono', 'Courier New', monospace;
 
   /* Spacing base */
-  --space-1:  0.25rem;   /*  4px */
-  --space-2:  0.5rem;    /*  8px */
-  --space-3:  0.75rem;   /* 12px */
-  --space-4:  1rem;      /* 16px */
-  --space-5:  1.25rem;   /* 20px */
-  --space-6:  1.5rem;    /* 24px */
-  --space-8:  2rem;      /* 32px */
-  --space-10: 2.5rem;    /* 40px */
-  --space-12: 3rem;      /* 48px */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
 
   /* Radios */
-  --radius-sm:  4px;
-  --radius-md:  8px;
-  --radius-lg:  12px;
-  --radius-xl:  16px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
-
-  /* Sombras — mínimas, solo para elevación real */
-  --shadow-sm:  0 1px 2px rgba(28, 43, 53, 0.06);
-  --shadow-md:  0 2px 8px rgba(28, 43, 53, 0.08);
-  --shadow-lg:  0 4px 16px rgba(28, 43, 53, 0.10);
 
   /* Sidebar */
   --sidebar-width: 240px;
@@ -119,7 +82,7 @@ html {
 /* Temperatura en dashboard — elemento firma */
 .temp-display {
   font-family: var(--font-mono);
-  font-size: 2.25rem; /* text-4xl */
+  font-size: 2.25rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -180,7 +143,7 @@ html {
 
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .nav-item--active {
@@ -194,4 +157,70 @@ html {
 .text-eucalyptus { color: var(--color-eucalyptus); }
 .bg-surface { background-color: var(--color-surface); }
 .bg-card { background-color: var(--color-surface-card); }
+
+/* ─── Fix Tailwind v4 arbitrary values con CSS variables ──── */
+@layer utilities {
+  .bg-\[--color-slate-900\] { background-color: var(--color-slate-900); }
+  .bg-\[--color-slate-700\] { background-color: var(--color-slate-700); }
+  .bg-\[--color-slate-500\] { background-color: var(--color-slate-500); }
+  .bg-\[--color-slate-300\] { background-color: var(--color-slate-300); }
+  .bg-\[--color-eucalyptus\] { background-color: var(--color-eucalyptus); }
+  .bg-\[--color-eucalyptus-light\] { background-color: var(--color-eucalyptus-light); }
+  .bg-\[--color-eucalyptus-bg\] { background-color: var(--color-eucalyptus-bg); }
+  .bg-\[--color-surface\] { background-color: var(--color-surface); }
+  .bg-\[--color-surface-card\] { background-color: var(--color-surface-card); }
+  .bg-\[--color-border\] { background-color: var(--color-border); }
+  .bg-\[--color-border-strong\] { background-color: var(--color-border-strong); }
+  .bg-\[--color-danger\] { background-color: var(--color-danger); }
+  .bg-\[--color-danger-bg\] { background-color: var(--color-danger-bg); }
+  .bg-\[--color-warning\] { background-color: var(--color-warning); }
+  .bg-\[--color-warning-bg\] { background-color: var(--color-warning-bg); }
+
+  .text-\[--color-slate-900\] { color: var(--color-slate-900); }
+  .text-\[--color-slate-500\] { color: var(--color-slate-500); }
+  .text-\[--color-slate-400\] { color: var(--color-slate-400); }
+  .text-\[--color-slate-300\] { color: var(--color-slate-300); }
+  .text-\[--color-slate-700\] { color: var(--color-slate-700); }
+  .text-\[--color-eucalyptus\] { color: var(--color-eucalyptus); }
+  .text-\[--color-eucalyptus-light\] { color: var(--color-eucalyptus-light); }
+  .text-\[--color-danger\] { color: var(--color-danger); }
+  .text-\[--color-warning\] { color: var(--color-warning); }
+  .text-\[--color-text-primary\] { color: var(--color-text-primary); }
+  .text-\[--color-text-secondary\] { color: var(--color-text-secondary); }
+  .text-\[--color-text-muted\] { color: var(--color-text-muted); }
+  .text-\[--color-text-inverse\] { color: var(--color-text-inverse); }
+
+  .border-\[--color-border\] { border-color: var(--color-border); }
+  .border-\[--color-border-strong\] { border-color: var(--color-border-strong); }
+  .border-\[--color-border-focus\] { border-color: var(--color-border-focus); }
+  .border-\[--color-eucalyptus\] { border-color: var(--color-eucalyptus); }
+  .border-\[--color-danger\] { border-color: var(--color-danger); }
+  .border-\[--color-slate-300\] { border-color: var(--color-slate-300); }
+
+  .ring-\[--color-eucalyptus\] { --tw-ring-color: var(--color-eucalyptus); }
+  .ring-\[--color-border\] { --tw-ring-color: var(--color-border); }
+  .ring-offset-\[--color-surface\] { --tw-ring-offset-color: var(--color-surface); }
+
+  .placeholder\:text-\[--color-slate-500\]::placeholder { color: var(--color-slate-500); }
+
+  .hover\:bg-\[--color-eucalyptus-light\]:hover { background-color: var(--color-eucalyptus-light); }
+  .hover\:bg-\[--color-surface\]:hover { background-color: var(--color-surface); }
+  .hover\:bg-\[--color-border-strong\]:hover { border-color: var(--color-border-strong); }
+  .hover\:text-\[--color-slate-900\]:hover { color: var(--color-slate-900); }
+
+  .focus\:bg-\[--color-surface\]:focus { background-color: var(--color-surface); }
+  .focus\:ring-\[--color-eucalyptus\]:focus { --tw-ring-color: var(--color-eucalyptus); }
+  .focus\:text-\[--color-slate-900\]:focus { color: var(--color-slate-900); }
+
+  .focus-visible\:ring-\[--color-eucalyptus\]:focus-visible { --tw-ring-color: var(--color-eucalyptus); }
+  .focus-visible\:ring-offset-\[--color-surface\]:focus-visible { --tw-ring-offset-color: var(--color-surface); }
+
+  .data-\[state\=checked\]\:bg-\[--color-eucalyptus\][data-state="checked"] { background-color: var(--color-eucalyptus); }
+  .data-\[state\=checked\]\:border-\[--color-eucalyptus\][data-state="checked"] { border-color: var(--color-eucalyptus); }
+  .data-\[state\=unchecked\]\:bg-\[--color-border\][data-state="unchecked"] { background-color: var(--color-border); }
+  .data-\[state\=open\]\:bg-\[--color-surface\][data-state="open"] { background-color: var(--color-surface); }
+
+  .ring-offset-\[--color-surface\] { --tw-ring-offset-color: var(--color-surface); }
+  .ring-offset-2 { --tw-ring-offset-width: 2px; }
+}
 

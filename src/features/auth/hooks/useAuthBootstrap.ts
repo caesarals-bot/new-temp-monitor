@@ -3,7 +3,9 @@ import { useAuthStore } from '@/features/auth/store/auth.store';
 import { supabase } from '@/shared/lib/supabase';
 
 export function useAuthBootstrap() {
-  const { setSession, setProfile, setHydrated } = useAuthStore();
+  const setSession = useAuthStore((s) => s.setSession);
+  const setProfile = useAuthStore((s) => s.setProfile);
+  const setHydrated = useAuthStore((s) => s.setHydrated);
 
   useEffect(() => {
     const initAuth = async () => {

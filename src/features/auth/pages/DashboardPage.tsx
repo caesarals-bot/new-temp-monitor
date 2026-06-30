@@ -3,7 +3,8 @@ import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 
 export function DashboardPage() {
-  const { profile, signOut } = useAuthStore();
+  const profile = useAuthStore((s) => s.profile);
+  const signOut = useAuthStore((s) => s.signOut);
 
   return (
     <div className="p-8">

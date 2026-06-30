@@ -26,7 +26,7 @@
 | Lenguaje | TypeScript 5.x | Strict mode |
 | Build | Vite 8.x | |
 | Estilos | Tailwind CSS v4 | CSS-first |
-| Routing | React Router v7 | SPA mode |
+| Routing | React Router v8 | SPA mode |
 | Estado global | Zustand 5.x | Selectores granulares |
 | Backend | Supabase | Auth + DB + RLS |
 | UI | shadcn/ui | Tema custom |

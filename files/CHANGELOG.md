@@ -13,6 +13,7 @@
 | TASK-001b | Schema BD: crear tablas + `equipment.physical_location` | 2026-06-30 | Scripts SQL en `supabase/migrations/`, RLS habilitado |
 | TASK-002 | Integración Supabase: cliente, tipos, env validation | 2026-06-30 | Cliente singleton, tipos generados, validación Zod |
 | TASK-003 | AuthStore (Zustand) + login/logout + React Router v7 | 2026-06-30 | Store con signIn/signOut/signUp, ProtectedRoute, LoginPage |
+| TASK-004 | Onboarding guiado: org + sede + staff + equipment | 2026-06-30 | Wizard 5 pasos, Zod por paso, RPC transaccional, bootstrap org/locations, 39 tests pasando |
 | P0-001 | Git + .gitignore + ramas | 2026-06-30 | main (base estable), develop (HEAD trabajo) |
 
 ---
@@ -23,11 +24,19 @@
 
 ---
 
+## Notas técnicas pendientes (housekeeping)
+
+| ID | Origen | Nota |
+|----|--------|------|
+| H-001 | TASK-004 | Regenerar `src/shared/types/supabase.ts` desde Supabase para que la RPC `create_organization_with_owner` quede tipada. Hoy `auth.service.ts:21` usa `as string` para el retorno |
+
+---
+
 ## Pendientes
 
 | ID | Tarea | Prioridad | Módulo | Depende de |
 |----|-------|-----------|--------|------------|
-| TASK-004 | Onboarding guiado: organización → sede 1 → staff (opcional) → equipos (opcional) | Alta | auth | TASK-003 |
+| ~~TASK-004~~ | ~~Onboarding guiado~~ ✅ ver Completadas | — | auth | TASK-003 |
 | TASK-005 | AppShell: Sidebar, TopBar, layout base con RBAC | Alta | shared | TASK-003 |
 | TASK-006 | CRUD de sedes con límite por plan | Media | locations | TASK-005 |
 | TASK-006b | CRUD de personal (staff) — encargados de toma de temperatura por sede | Media | staff | TASK-005 |
