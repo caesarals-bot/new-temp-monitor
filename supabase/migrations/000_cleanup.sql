@@ -39,6 +39,18 @@ DROP TABLE IF EXISTS locations CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
 DROP TABLE IF EXISTS organizations CASCADE;
 
+-- 3b. Verificar y borrar cualquier tabla restante con "restaurant" en el nombre
+DO $$ DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP
+        IF r.tablename LIKE '%restaurant%' THEN
+            EXECUTE format('DROP TABLE IF EXISTS %I CASCADE', r.tablename);
+            RAISE NOTICE 'Dropped table: %', r.tablename;
+        END IF;
+    END LOOP;
+END $$;
+
 -- 4. Borrar tipos enum (en orden por dependencias)
 DROP TYPE IF EXISTS reading_type_enum CASCADE;
 DROP TYPE IF EXISTS incident_status_enum CASCADE;
@@ -58,3 +70,8 @@ WHERE table_schema = 'public';
 SELECT 'Tipos restantes: ' || COUNT(*) AS result
 FROM pg_type
 WHERE typnamespace = 'public'::regnamespace;
+
+-- Mostrar tablas exactas que quedaron
+SELECT 'Tablas: ' || string_agg(table_name, ', ') AS result
+FROM information_schema.tables
+WHERE table_schema = 'public';
