@@ -12,7 +12,7 @@
  */
 
 import type { Session, User } from '@supabase/supabase-js';
-import type { Organization, Location, Profile, Incident } from '@/shared/types/supabase';
+import type { Organization, Location, Profile, Incident, Staff } from '@/shared/types/supabase';
 
 export const isDevBypassEnabled = (): boolean => {
   return import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
@@ -96,6 +96,38 @@ export function getDevMockLocations(): Location[] {
 
 export function getDevMockActiveLocationId(): string {
   return DEV_LOC_1_ID;
+}
+
+const DEV_STAFF_LOC1_A = '00000000-0000-0000-0000-000000000201';
+const DEV_STAFF_LOC1_B = '00000000-0000-0000-0000-000000000202';
+const DEV_STAFF_LOC2_A = '00000000-0000-0000-0000-000000000203';
+const DEV_STAFF_LOC2_B = '00000000-0000-0000-0000-000000000204';
+
+function buildStaff(
+  id: string,
+  locationId: string,
+  name: string,
+  role: string,
+  active: boolean
+): Staff {
+  return {
+    id,
+    location_id: locationId,
+    name,
+    role,
+    active,
+    created_at: '2026-06-30T00:00:00Z',
+    updated_at: '2026-06-30T00:00:00Z',
+  };
+}
+
+export function getDevMockStaff(): Staff[] {
+  return [
+    buildStaff(DEV_STAFF_LOC1_A, DEV_LOC_1_ID, 'María López', 'Cocinera', true),
+    buildStaff(DEV_STAFF_LOC1_B, DEV_LOC_1_ID, 'Pedro Ramírez', 'Auxiliar de cocina', true),
+    buildStaff(DEV_STAFF_LOC2_A, DEV_LOC_2_ID, 'Ana Torres', 'Cocinera', true),
+    buildStaff(DEV_STAFF_LOC2_B, DEV_LOC_2_ID, 'Luis Vega', 'Auxiliar de cocina', true),
+  ];
 }
 
 const DEV_READING_ID = '00000000-0000-0000-0000-000000000200';
