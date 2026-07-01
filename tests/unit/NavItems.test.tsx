@@ -37,7 +37,7 @@ beforeEach(() => {
 });
 
 describe('NavItems - owner role', () => {
-  it('renders 7 items', () => {
+  it('renders 8 items', () => {
     render(
       <MemoryRouter>
         <NavItems />
@@ -45,9 +45,10 @@ describe('NavItems - owner role', () => {
     );
 
     const links = screen.getAllByRole('link');
-    expect(links).toHaveLength(7);
+    expect(links).toHaveLength(8);
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Sedes')).toBeInTheDocument();
+    expect(screen.getByText('Personal')).toBeInTheDocument();
     expect(screen.getByText('Equipos')).toBeInTheDocument();
     expect(screen.getByText('Lecturas')).toBeInTheDocument();
     expect(screen.getByText('Incidentes')).toBeInTheDocument();

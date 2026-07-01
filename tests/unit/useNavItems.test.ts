@@ -19,14 +19,15 @@ describe('getNavItems', () => {
   });
 
   describe('owner', () => {
-    it('returns full nav with 7 items including incidents badge', () => {
+    it('returns full nav with 8 items including incidents badge', () => {
       const items = getNavItems({ role: 'owner', isPlatformAdmin: false });
-      expect(items).toHaveLength(7);
+      expect(items).toHaveLength(8);
 
       const toList = items.map((i) => i.to);
       expect(toList).toEqual([
         '/',
         '/locations',
+        '/staff',
         '/equipment',
         '/readings',
         '/incidents',
@@ -48,13 +49,14 @@ describe('getNavItems', () => {
   });
 
   describe('manager', () => {
-    it('returns 5 items excluding locations and settings', () => {
+    it('returns 6 items including staff but excluding locations and settings', () => {
       const items = getNavItems({ role: 'manager', isPlatformAdmin: false });
-      expect(items).toHaveLength(5);
+      expect(items).toHaveLength(6);
 
       const toList = items.map((i) => i.to);
       expect(toList).not.toContain('/locations');
       expect(toList).not.toContain('/settings');
+      expect(toList).toContain('/staff');
       expect(toList).toContain('/incidents');
       expect(toList).toContain('/reports');
     });

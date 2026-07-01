@@ -8,6 +8,7 @@ import {
   MapPin,
   Settings,
   Thermometer,
+  Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { UserRoleEnum } from '@/shared/types/supabase';
@@ -40,6 +41,7 @@ export function getNavItems({ role, isPlatformAdmin }: UseNavItemsInput): NavIte
       return [
         { to: '/', label: 'Dashboard', icon: LayoutDashboard, badge: undefined },
         { to: '/locations', label: 'Sedes', icon: MapPin },
+        { to: '/staff', label: 'Personal', icon: Users },
         { to: '/equipment', label: 'Equipos', icon: Thermometer },
         { to: '/readings', label: 'Lecturas', icon: ClipboardList },
         { to: '/incidents', label: 'Incidentes', icon: AlertTriangle, badge: 'incidents' },
@@ -50,6 +52,7 @@ export function getNavItems({ role, isPlatformAdmin }: UseNavItemsInput): NavIte
     case 'manager':
       return [
         { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+        { to: '/staff', label: 'Personal', icon: Users },
         { to: '/equipment', label: 'Equipos', icon: Thermometer },
         { to: '/readings', label: 'Lecturas', icon: ClipboardList },
         { to: '/incidents', label: 'Incidentes', icon: AlertTriangle, badge: 'incidents' },
