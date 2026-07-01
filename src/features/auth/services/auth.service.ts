@@ -1,11 +1,9 @@
 import { supabase } from '@/shared/lib/supabase';
 import type {
   OrganizationFormData,
-  LocationFormData,
   StaffMemberFormData,
   EquipmentFormData,
 } from '../schemas/onboarding.schema';
-import type { Location } from '@/shared/types/supabase';
 
 interface AccountInfo {
   email: string;
@@ -32,24 +30,6 @@ export class AuthService {
 
     if (error) return { error: error.message, organizationId: null };
     return { error: null, organizationId: result as string };
-  }
-
-  async createLocation(
-    organizationId: string,
-    data: LocationFormData
-  ): Promise<{ error: string | null; location: Location | null }> {
-    const { data: location, error } = await supabase
-      .from('locations')
-      .insert({
-        organization_id: organizationId,
-        name: data.name,
-        address: data.address ?? null,
-      })
-      .select()
-      .single();
-
-    if (error) return { error: error.message, location: null };
-    return { error: null, location };
   }
 
   async createStaff(

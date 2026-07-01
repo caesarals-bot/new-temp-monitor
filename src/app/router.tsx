@@ -4,7 +4,7 @@ import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
 import { useOrganizationBootstrap } from '@/features/organizations/hooks/useOrganizationBootstrap';
 import { useIncidentsBootstrap } from '@/features/incidents/hooks/useIncidentsBootstrap';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
-import { LazyLoginPage, LazyRegisterPage, LazyOnboardingPage, LazyDashboardPage, RouteFallback } from '@/app/LazyPages';
+import { LazyLoginPage, LazyRegisterPage, LazyOnboardingPage, LazyDashboardPage, LazyLocationsPage, RouteFallback } from '@/app/LazyPages';
 import { AppShell } from '@/shared/components/layout/AppShell';
 import { RoutePlaceholder } from '@/shared/components/layout/RoutePlaceholder';
 
@@ -58,7 +58,7 @@ function Router() {
               },
               {
                 path: 'locations',
-                element: <RoutePlaceholder title="Sedes" taskId="TASK-006" />,
+                element: lazyElement(LazyLocationsPage),
               },
               {
                 path: 'equipment',

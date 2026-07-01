@@ -69,7 +69,7 @@ export function getDevMockOrganization(): Organization {
     business_type: 'restaurant',
     status: 'active',
     plan_type: 'pro',
-    max_locations: 3,
+    max_locations: 2,
     created_by: DEV_USER_ID,
     created_at: '2026-06-30T00:00:00Z',
   };

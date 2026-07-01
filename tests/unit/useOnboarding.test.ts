@@ -4,10 +4,13 @@ import { renderHook, act } from '@testing-library/react';
 vi.mock('@/features/auth/services/auth.service', () => ({
   authService: {
     createOrganization: vi.fn(),
-    createLocation: vi.fn(),
     createStaff: vi.fn(),
     createEquipment: vi.fn(),
   },
+}));
+
+vi.mock('@/features/locations/services/locations.service', () => ({
+  createLocation: vi.fn(),
 }));
 
 vi.mock('@/features/organizations/store/organization.store', () => ({
@@ -66,6 +69,7 @@ vi.mock('@/features/auth/store/auth.store', () => ({
 }));
 
 import { authService } from '@/features/auth/services/auth.service';
+import { createLocation } from '@/features/locations/services/locations.service';
 import { useOnboarding } from '@/features/auth/hooks/useOnboarding';
 
 beforeEach(() => {
@@ -144,9 +148,9 @@ describe('useOnboarding', () => {
       error: null,
       organizationId: 'org-1',
     });
-    (authService.createLocation as ReturnType<typeof vi.fn>).mockResolvedValue({
+    (createLocation as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: { id: 'loc-1', name: 'Casa Central', address: null, organization_id: 'org-1' },
       error: null,
-      location: { id: 'loc-1', name: 'Casa Central', address: null, organization_id: 'org-1' },
     });
     (authService.createStaff as ReturnType<typeof vi.fn>).mockResolvedValue({ error: null });
     (authService.createEquipment as ReturnType<typeof vi.fn>).mockResolvedValue({ error: null });
@@ -169,7 +173,7 @@ describe('useOnboarding', () => {
 
     expect(res).toEqual({ success: true });
     expect(authService.createOrganization).toHaveBeenCalledOnce();
-    expect(authService.createLocation).toHaveBeenCalledOnce();
+    expect(createLocation).toHaveBeenCalledOnce();
     expect(authService.createStaff).toHaveBeenCalledOnce();
     expect(authService.createEquipment).toHaveBeenCalledOnce();
     expect(result.current.error).toBeNull();

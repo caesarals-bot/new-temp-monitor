@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { authService } from '../services/auth.service';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
+import { createLocation as createLocationService } from '@/features/locations/services/locations.service';
 import { supabase } from '@/shared/lib/supabase';
 import type {
   OrganizationFormData,
@@ -126,10 +127,15 @@ export function useOnboarding(): UseOnboardingReturn {
         return { success: false };
       }
 
-      const { error: locationError, location: createdLoc } = await authService.createLocation(
+      const { data: createdLoc, error: locationError } = await createLocationService({
         organizationId,
-        location
-      );
+        name: location.name,
+        address: location.address ?? null,
+      });
+      if (locationError || !createdLoc) {
+        setError(locationError?.message ?? 'Error al crear sede');
+        return { success: false };
+      }
       if (locationError || !createdLoc) {
         setError(locationError ?? 'Error al crear sede');
         return { success: false };

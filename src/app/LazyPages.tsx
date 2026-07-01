@@ -17,6 +17,10 @@ export const LazyDashboardPage = lazy(() =>
   import('@/features/auth/pages/DashboardPage').then((m) => ({ default: m.DashboardPage }))
 );
 
+export const LazyLocationsPage = lazy(() =>
+  import('@/features/locations/pages/LocationsPage').then((m) => ({ default: m.LocationsPage }))
+);
+
 export function RouteFallback() {
   return (
     <div className="flex h-screen items-center justify-center">
