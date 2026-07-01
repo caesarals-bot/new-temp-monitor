@@ -12,7 +12,7 @@
  */
 
 import type { Session, User } from '@supabase/supabase-js';
-import type { Organization, Location, Profile, Incident, Staff } from '@/shared/types/supabase';
+import type { Organization, Location, Profile, Incident, Staff, Equipment } from '@/shared/types/supabase';
 
 export const isDevBypassEnabled = (): boolean => {
   return import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
@@ -127,6 +127,45 @@ export function getDevMockStaff(): Staff[] {
     buildStaff(DEV_STAFF_LOC1_B, DEV_LOC_1_ID, 'Pedro Ramírez', 'Auxiliar de cocina', true),
     buildStaff(DEV_STAFF_LOC2_A, DEV_LOC_2_ID, 'Ana Torres', 'Cocinera', true),
     buildStaff(DEV_STAFF_LOC2_B, DEV_LOC_2_ID, 'Luis Vega', 'Auxiliar de cocina', true),
+  ];
+}
+
+const DEV_EQ_LOC1_A = '00000000-0000-0000-0000-000000000301';
+const DEV_EQ_LOC1_B = '00000000-0000-0000-0000-000000000302';
+const DEV_EQ_LOC1_C = '00000000-0000-0000-0000-000000000303';
+const DEV_EQ_LOC2_A = '00000000-0000-0000-0000-000000000304';
+const DEV_EQ_LOC2_B = '00000000-0000-0000-0000-000000000305';
+
+function buildEquipment(
+  id: string,
+  locationId: string,
+  name: string,
+  physicalLocation: string,
+  code: string,
+  minTemp: number,
+  maxTemp: number
+): Equipment {
+  return {
+    id,
+    location_id: locationId,
+    name,
+    physical_location: physicalLocation,
+    code,
+    min_temp: minTemp,
+    max_temp: maxTemp,
+    is_iot_enabled: false,
+    iot_device_id: null,
+    created_at: '2026-06-30T00:00:00Z',
+  };
+}
+
+export function getDevMockEquipment(): Equipment[] {
+  return [
+    buildEquipment(DEV_EQ_LOC1_A, DEV_LOC_1_ID, 'Refrigerador Lácteos', 'Cocina - pared norte', 'EQ-CC-001', 0, 6),
+    buildEquipment(DEV_EQ_LOC1_B, DEV_LOC_1_ID, 'Congelador Carnes', 'Bodega', 'EQ-CC-002', -22, -15),
+    buildEquipment(DEV_EQ_LOC1_C, DEV_LOC_1_ID, 'Vitrina Refrigerada', 'Mostrador', 'EQ-CC-003', 2, 8),
+    buildEquipment(DEV_EQ_LOC2_A, DEV_LOC_2_ID, 'Refrigerador Bebidas', 'Sala ventas', 'EQ-SN-001', 0, 8),
+    buildEquipment(DEV_EQ_LOC2_B, DEV_LOC_2_ID, 'Congelador Helados', 'Bodega trasera', 'EQ-SN-002', -20, -12),
   ];
 }
 
