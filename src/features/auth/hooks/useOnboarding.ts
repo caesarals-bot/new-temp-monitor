@@ -3,6 +3,7 @@ import { authService } from '../services/auth.service';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
 import { createLocation as createLocationService } from '@/features/locations/services/locations.service';
 import { createStaff as createStaffService } from '@/features/staff/services/staff.service';
+import { createEquipment as createEquipmentService } from '@/features/equipment/services/equipment.service';
 import { supabase } from '@/shared/lib/supabase';
 import type {
   OrganizationFormData,
@@ -155,9 +156,15 @@ export function useOnboarding(): UseOnboardingReturn {
       }
 
       for (const equip of equipment) {
-        const { error: equipError } = await authService.createEquipment(createdLoc.id, equip);
+        const { error: equipError } = await createEquipmentService({
+          locationId: createdLoc.id,
+          name: equip.name,
+          physicalLocation: equip.physicalLocation ?? null,
+          minTemp: equip.minTemp,
+          maxTemp: equip.maxTemp,
+        });
         if (equipError) {
-          setError(equipError);
+          setError(equipError.message);
           return { success: false };
         }
       }
