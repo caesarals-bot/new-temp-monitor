@@ -15,6 +15,7 @@
 **Flujo:** Claude propone → César aprueba → Claude implementa → César revisa
 
 **Identidad visual:** `files/DESIGN.md`
+**Decisiones técnicas de arquitectura:** `files/ARCHITECTURE.md`
 
 ---
 
