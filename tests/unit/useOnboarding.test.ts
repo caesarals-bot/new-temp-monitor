@@ -4,13 +4,16 @@ import { renderHook, act } from '@testing-library/react';
 vi.mock('@/features/auth/services/auth.service', () => ({
   authService: {
     createOrganization: vi.fn(),
-    createStaff: vi.fn(),
     createEquipment: vi.fn(),
   },
 }));
 
 vi.mock('@/features/locations/services/locations.service', () => ({
   createLocation: vi.fn(),
+}));
+
+vi.mock('@/features/staff/services/staff.service', () => ({
+  createStaff: vi.fn(),
 }));
 
 vi.mock('@/features/organizations/store/organization.store', () => ({
@@ -70,6 +73,7 @@ vi.mock('@/features/auth/store/auth.store', () => ({
 
 import { authService } from '@/features/auth/services/auth.service';
 import { createLocation } from '@/features/locations/services/locations.service';
+import { createStaff } from '@/features/staff/services/staff.service';
 import { useOnboarding } from '@/features/auth/hooks/useOnboarding';
 
 beforeEach(() => {
@@ -126,7 +130,7 @@ describe('useOnboarding', () => {
     act(() => result.current.removeEquipment(0));
     expect(result.current.equipment).toEqual([]);
 
-    expect(authService.createStaff).not.toHaveBeenCalled();
+    expect(createStaff).not.toHaveBeenCalled();
     expect(authService.createEquipment).not.toHaveBeenCalled();
   });
 
@@ -152,7 +156,7 @@ describe('useOnboarding', () => {
       data: { id: 'loc-1', name: 'Casa Central', address: null, organization_id: 'org-1' },
       error: null,
     });
-    (authService.createStaff as ReturnType<typeof vi.fn>).mockResolvedValue({ error: null });
+    (createStaff as ReturnType<typeof vi.fn>).mockResolvedValue({ data: null, error: null });
     (authService.createEquipment as ReturnType<typeof vi.fn>).mockResolvedValue({ error: null });
 
     const { result } = renderHook(() => useOnboarding());
@@ -174,7 +178,7 @@ describe('useOnboarding', () => {
     expect(res).toEqual({ success: true });
     expect(authService.createOrganization).toHaveBeenCalledOnce();
     expect(createLocation).toHaveBeenCalledOnce();
-    expect(authService.createStaff).toHaveBeenCalledOnce();
+    expect(createStaff).toHaveBeenCalledOnce();
     expect(authService.createEquipment).toHaveBeenCalledOnce();
     expect(result.current.error).toBeNull();
   });

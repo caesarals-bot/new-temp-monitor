@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { authService } from '../services/auth.service';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
 import { createLocation as createLocationService } from '@/features/locations/services/locations.service';
+import { createStaff as createStaffService } from '@/features/staff/services/staff.service';
 import { supabase } from '@/shared/lib/supabase';
 import type {
   OrganizationFormData,
@@ -142,9 +143,13 @@ export function useOnboarding(): UseOnboardingReturn {
       }
 
       for (const staff of staffMembers) {
-        const { error: staffError } = await authService.createStaff(createdLoc.id, staff);
+        const { error: staffError } = await createStaffService({
+          locationId: createdLoc.id,
+          name: staff.name,
+          role: staff.role,
+        });
         if (staffError) {
-          setError(staffError);
+          setError(staffError.message);
           return { success: false };
         }
       }

@@ -1,7 +1,6 @@
 import { supabase } from '@/shared/lib/supabase';
 import type {
   OrganizationFormData,
-  StaffMemberFormData,
   EquipmentFormData,
 } from '../schemas/onboarding.schema';
 
@@ -30,19 +29,6 @@ export class AuthService {
 
     if (error) return { error: error.message, organizationId: null };
     return { error: null, organizationId: result as string };
-  }
-
-  async createStaff(
-    locationId: string,
-    data: StaffMemberFormData
-  ): Promise<{ error: string | null }> {
-    const { error } = await supabase.from('staff').insert({
-      location_id: locationId,
-      name: data.name,
-      role: data.role,
-    });
-
-    return { error: error?.message ?? null };
   }
 
   async createEquipment(
