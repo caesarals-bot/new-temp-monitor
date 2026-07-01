@@ -16,6 +16,7 @@
 | TASK-004 | Onboarding guiado: org + sede + staff + equipment | 2026-06-30 | Wizard 5 pasos, Zod por paso, RPC transaccional, bootstrap org/locations, 39 tests pasando |
 | TASK-005 | AppShell: layout con RBAC + responsive + code splitting | 2026-06-30 | Sidebar fixed (desktop) + drawer (mobile), TopBar, NavItems con badge, LocationSelector, useIncidentStore, Platform Admin layout con flag, 110 tests pasando |
 | TASK-006 | CRUD de sedes con límite por plan | 2026-07-01 | locations.service (7 fn), schemas Zod, LocationCard/Header/FormDialog/DeleteDialog, LocationsPage con useLocationsManagement hook, RBAC owner/admin, dev-bypass max_locations=2 para test visual, 199 tests pasando |
+| TASK-006b | CRUD de personal (staff) — soft delete + scoped por sede activa | 2026-07-01 | staff.service (6 fn: list/get/create/update/setActive/countReadings), schemas Zod, StaffCard/Header/FormDialog/ToggleDialog, StaffsPage con useStaffManagement hook, RBAC owner/admin/manager, soft delete via staff.active preservando lecturas, dev-bypass con 2 staff por sede, NavItem Personal agregado, 281 tests pasando |
 | P0-001 | Git + .gitignore + ramas | 2026-06-30 | main (base estable), develop (HEAD trabajo) |
 
 ---
@@ -95,7 +96,7 @@ depende de TASK-005 (AppShell) y esta ya commiteada.
 | ~~TASK-004~~ | ~~Onboarding guiado~~ ✅ ver Completadas | — | auth | TASK-003 |
 | ~~TASK-005~~ | ~~AppShell con RBAC~~ ✅ ver Completadas | — | shared | TASK-003 |
 | ~~TASK-006~~ | ~~CRUD de sedes con límite por plan~~ ✅ ver Completadas | — | locations | TASK-005 |
-| TASK-006b | CRUD de personal (staff) — encargados de toma de temperatura por sede | Media | staff | TASK-005 |
+| ~~TASK-006b~~ | ~~CRUD de personal (staff)~~ ✅ ver Completadas | — | staff | TASK-005 |
 | TASK-007 | CRUD de equipos con rangos térmicos, nombre y ubicación | Media | equipment | TASK-006 |
 | TASK-008 | Formulario de registro de lectura manual | Alta | readings | TASK-007 |
 | TASK-009 | Dashboard de lecturas con estado en tiempo real (Supabase realtime) | Alta | readings | TASK-008 |
