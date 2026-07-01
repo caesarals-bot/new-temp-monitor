@@ -18,6 +18,7 @@
 | TASK-006 | CRUD de sedes con límite por plan | 2026-07-01 | locations.service (7 fn), schemas Zod, LocationCard/Header/FormDialog/DeleteDialog, LocationsPage con useLocationsManagement hook, RBAC owner/admin, dev-bypass max_locations=2 para test visual, 199 tests pasando |
 | TASK-006b | CRUD de personal (staff) — soft delete + scoped por sede activa | 2026-07-01 | staff.service (6 fn: list/get/create/update/setActive/countReadings), schemas Zod, StaffCard/Header/FormDialog/ToggleDialog, StaffsPage con useStaffManagement hook, RBAC owner/admin/manager, soft delete via staff.active preservando lecturas, dev-bypass con 2 staff por sede, NavItem Personal agregado, 281 tests pasando |
 | TASK-007 | CRUD de equipos con rangos térmicos + scoped por sede activa | 2026-07-01 | equipment.service (6 fn: list/get/create/update/delete/countReadings), schemas Zod con refine min<max, EquipmentCard/Header/FormDialog/DeleteDialog, EquipmentsPage con useEquipmentManagement hook, RBAC owner/admin/manager, dev-bypass con 2-3 equipos por sede (refrigerador, congelador, vitrina), 364 tests pasando |
+| DOC-001 | `files/ARCHITECTURE.md` — documentación técnica viva | 2026-07-01 | Principios, capas, estructura template de feature, stores, patrón CRUD, soft delete, manejo de errores, testing, dev-bypass, anti-patrones, commits convention |
 | P0-001 | Git + .gitignore + ramas | 2026-06-30 | main (base estable), develop (HEAD trabajo) |
 
 ---
@@ -34,6 +35,43 @@
 |----|--------|------|
 | H-001 | TASK-004 | Regenerar `src/shared/types/supabase.ts` desde Supabase para que la RPC `create_organization_with_owner` quede tipada. Hoy `auth.service.ts:21` usa `as string` para el retorno |
 | H-002 | TASK-005 | Anon key de Supabase fue referida textualmente en chat del agente. Rotar la key en Project Settings → API es opcional pero recomendable |
+
+---
+
+## Sesión 2026-07-01: cierre (continuación)
+
+### Alcance
+Continuación desde TASK-006. Se cierran **TASK-006b** (CRUD personal) y **TASK-007** (CRUD equipos) con metodología granular por bloques. Tambien se documenta la arquitectura del proyecto.
+
+### Bloques ejecutados
+- **TASK-006 · 1 commit unico de consolidacion** (cierre)
+- **TASK-006b · 10 commits granulares** (B-prep, B1..B9, B11)
+- **TASK-007 · 10 commits granulares** (B-prep, B1..B10)
+- **docs · 1 commit** para `files/ARCHITECTURE.md`
+
+### Patrón de feature establecido (template)
+Cada CRUD nuevo replica: `service` + `schema` + 4 componentes (`Card`, `Header`, `FormDialog`, `Delete/ToggleDialog`) + `hook` con state machine + `page` de composición pura + integracion en router/nav. Documentado en `files/ARCHITECTURE.md`.
+
+### Decisiones de diseno aplicadas (vivas)
+- **Feature-first mantenido:** `createLocation`, `createStaff` y `createEquipment` migrados de `auth.service` a sus features (`locations`, `staff`, `equipment`). `auth.service` queda solo con `createOrganization` (RPC transaccional).
+- **Hook por dominio:** `useLocationsManagement`, `useStaffManagement`, `useEquipmentManagement`. State machine `closed | create | edit | delete` aislado del JSX.
+- **Errors separados por dialog:** `formError` y `deleteError` (o `toggleError`) son estados independientes. Fix de bug latente donde un error de create se mostraba en el dialog de delete.
+- **Soft delete en `staff` via `staff.active`:** preserva trazabilidad HACCP. El FK de `temperature_readings.recorded_by_staff` sigue apuntando al staff inactivo.
+- **Hard delete en `equipment` y `locations`:** cascade a readings/incidents es aceptable para V1.
+- **Fetch reactivo por `activeLocationId`:** cambiar de sede en el TopBar recarga la lista automáticamente (staff y equipment).
+- **Linter estricto de React 19:** `setState` en `useEffect` requiere `eslint-disable-next-line` con justificacion en codigo. Documentado en cada hook.
+
+### Risgos / pendientes tecnicos
+- **H-001:** regenerar `src/shared/types/supabase.ts` para tipar la RPC `create_organization_with_owner` (sigue con `as string` en `auth.service.ts:21`).
+- **H-002:** rotar anon key de Supabase (opcional, recomendado).
+- **Realtime de incidents:** `useIncidentStore.subscribeRealtime(orgId)` sigue siendo noop. Se implementa en TASK-010 con `supabase.channel().on('postgres_changes')`.
+- **Contadores placeholder 0:** `LocationCard`, `StaffCard`, `EquipmentCard` muestran `0 equipos` / `0 lecturas` como placeholder consciente. Se cablean en TASK-008/009 cuando existan los services de readings.
+
+### Pendientes (siguiente tarea logica)
+**TASK-008** (formulario de registro de lectura manual, prioridad Alta) ya tiene dependencias satisfechas: depende de TASK-007 (equipment) que está commiteada.
+
+### Siguiente tarea logica
+**TASK-008** — Inicia el dominio `readings`. Crear `readings.service`, `readings.schema`, formulario de registro manual con selección de equipo + staff + temperatura + timestamp.
 
 ---
 
