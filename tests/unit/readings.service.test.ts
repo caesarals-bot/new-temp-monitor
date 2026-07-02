@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { TemperatureReading } from '@/shared/types/supabase';
 import {
   listReadingsByEquipment,
+  listReadingsByLocation,
+  latestReadingByEquipment,
+  countReadingsByLocation,
   getReading,
   createReading,
   countReadingsByEquipment,
@@ -13,8 +16,10 @@ vi.mock('@/shared/lib/supabase', () => {
     c.select = vi.fn(() => c);
     c.insert = vi.fn(() => c);
     c.eq = vi.fn(() => c);
+    c.in = vi.fn(() => c);
     c.order = vi.fn(() => c);
     c.limit = vi.fn(() => c);
+    c.maybeSingle = vi.fn(() => Promise.resolve({ data: null, error: null }));
     c.single = vi.fn(() => Promise.resolve({ data: null, error: null }));
     return c;
   };
@@ -192,5 +197,141 @@ describe('readings.service · countReadingsByEquipment', () => {
     expect(eq).toHaveBeenCalledWith('equipment_id', 'eq-1');
     expect(count).toBe(42);
     expect(error).toBeNull();
+  });
+});
+
+describe('readings.service · listReadingsByLocation', () => {
+  it('returns empty list when location has no equipment', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: [], error: null });
+    const select = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select, eq });
+
+    const { data, error } = await listReadingsByLocation('loc-1');
+
+    expect(supabase.from).toHaveBeenCalledWith('equipment');
+    expect(eq).toHaveBeenCalledWith('location_id', 'loc-1');
+    expect(data).toEqual([]);
+    expect(error).toBeNull();
+  });
+
+  it('queries readings filtered by equipment ids of the location', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: [{ id: 'eq-1' }, { id: 'eq-2' }], error: null });
+    const selectEq = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select: selectEq, eq });
+
+    const order = vi.fn().mockResolvedValue({ data: [sampleReading], error: null });
+    const inFn = vi.fn(() => ({ order }));
+    const selectR = vi.fn(() => ({ in: inFn }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      select: selectR,
+      in: inFn,
+      order,
+    });
+
+    const { data, error } = await listReadingsByLocation('loc-1');
+
+    expect(supabase.from).toHaveBeenNthCalledWith(2, 'temperature_readings');
+    expect(inFn).toHaveBeenCalledWith('equipment_id', ['eq-1', 'eq-2']);
+    expect(order).toHaveBeenCalledWith('recorded_at', { ascending: false });
+    expect(data).toEqual([sampleReading]);
+    expect(error).toBeNull();
+  });
+
+  it('propagates equipment query error', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: null, error: { message: 'loc boom' } });
+    const select = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select, eq });
+
+    const { data, error } = await listReadingsByLocation('loc-1');
+
+    expect(data).toBeNull();
+    expect(error).toEqual({ message: 'loc boom' });
+  });
+});
+
+describe('readings.service · latestReadingByEquipment', () => {
+  it('returns the most recent reading using limit(1).maybeSingle()', async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({ data: sampleReading, error: null });
+    const limit = vi.fn(() => ({ maybeSingle }));
+    const order = vi.fn(() => ({ limit }));
+    const eq = vi.fn(() => ({ order }));
+    const select = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      select,
+      eq,
+      order,
+      limit,
+      maybeSingle,
+    });
+
+    const { data, error } = await latestReadingByEquipment('eq-1');
+
+    expect(order).toHaveBeenCalledWith('recorded_at', { ascending: false });
+    expect(limit).toHaveBeenCalledWith(1);
+    expect(data).toEqual(sampleReading);
+    expect(error).toBeNull();
+  });
+
+  it('returns null data when no readings exist', async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+    const limit = vi.fn(() => ({ maybeSingle }));
+    const order = vi.fn(() => ({ limit }));
+    const eq = vi.fn(() => ({ order }));
+    const select = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      select,
+      eq,
+      order,
+      limit,
+      maybeSingle,
+    });
+
+    const { data, error } = await latestReadingByEquipment('eq-1');
+
+    expect(data).toBeNull();
+    expect(error).toBeNull();
+  });
+});
+
+describe('readings.service · countReadingsByLocation', () => {
+  it('returns 0 when location has no equipment', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: [], error: null });
+    const select = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select, eq });
+
+    const { count, error } = await countReadingsByLocation('loc-1');
+
+    expect(count).toBe(0);
+    expect(error).toBeNull();
+  });
+
+  it('counts readings across all equipment of a location', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: [{ id: 'eq-1' }, { id: 'eq-2' }], error: null });
+    const selectEq = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select: selectEq, eq });
+
+    const inFn = vi.fn().mockResolvedValue({ count: 17, error: null });
+    const selectR = vi.fn(() => ({ in: inFn }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      select: selectR,
+      in: inFn,
+    });
+
+    const { count, error } = await countReadingsByLocation('loc-1');
+
+    expect(inFn).toHaveBeenCalledWith('equipment_id', ['eq-1', 'eq-2']);
+    expect(count).toBe(17);
+    expect(error).toBeNull();
+  });
+
+  it('propagates equipment query error', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: null, error: { message: 'loc boom' } });
+    const select = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select, eq });
+
+    const { count, error } = await countReadingsByLocation('loc-1');
+
+    expect(count).toBeNull();
+    expect(error).toEqual({ message: 'loc boom' });
   });
 });

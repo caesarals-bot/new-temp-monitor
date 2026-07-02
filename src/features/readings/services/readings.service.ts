@@ -28,6 +28,73 @@ export async function listReadingsByEquipment(
   return { data, error };
 }
 
+export async function listReadingsByLocation(
+  locationId: string
+): Promise<{ data: TemperatureReading[] | null; error: PostgrestError | null }> {
+  const equipmentRes = await supabase
+    .from('equipment')
+    .select('id')
+    .eq('location_id', locationId);
+
+  if (equipmentRes.error) {
+    return { data: null, error: equipmentRes.error };
+  }
+
+  const equipmentIds = (equipmentRes.data ?? []).map((e) => e.id);
+
+  if (equipmentIds.length === 0) {
+    return { data: [], error: null };
+  }
+
+  const { data, error } = await supabase
+    .from('temperature_readings')
+    .select('*')
+    .in('equipment_id', equipmentIds)
+    .order('recorded_at', { ascending: false });
+
+  return { data, error };
+}
+
+export async function latestReadingByEquipment(
+  equipmentId: string
+): Promise<{ data: TemperatureReading | null; error: PostgrestError | null }> {
+  const { data, error } = await supabase
+    .from('temperature_readings')
+    .select('*')
+    .eq('equipment_id', equipmentId)
+    .order('recorded_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return { data, error };
+}
+
+export async function countReadingsByLocation(
+  locationId: string
+): Promise<{ count: number | null; error: PostgrestError | null }> {
+  const equipmentRes = await supabase
+    .from('equipment')
+    .select('id')
+    .eq('location_id', locationId);
+
+  if (equipmentRes.error) {
+    return { count: null, error: equipmentRes.error };
+  }
+
+  const equipmentIds = (equipmentRes.data ?? []).map((e) => e.id);
+
+  if (equipmentIds.length === 0) {
+    return { count: 0, error: null };
+  }
+
+  const { count, error } = await supabase
+    .from('temperature_readings')
+    .select('id', { count: 'exact', head: true })
+    .in('equipment_id', equipmentIds);
+
+  return { count, error };
+}
+
 export async function getReading(
   readingId: string
 ): Promise<{ data: TemperatureReading | null; error: PostgrestError | null }> {
