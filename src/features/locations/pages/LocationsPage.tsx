@@ -12,7 +12,7 @@ export function LocationsPage() {
   const locations = useOrganizationStore((s) => s.locations);
 
   const {
-    canEdit, atLimit, maxLocations, planType,
+    canEdit, atLimit, maxLocations, planType, equipmentCountByLocation,
     dialog, editingLocation, deletingLocation,
     dependencies, isLoadingDependencies, isMutating,
     formError, deleteError,
@@ -73,7 +73,7 @@ export function LocationsPage() {
               <LocationCard
                 key={location.id}
                 location={location}
-                equipmentCount={0}
+                equipmentCount={equipmentCountByLocation.get(location.id) ?? 0}
                 openIncidentCount={0}
                 canEdit={canEdit}
                 onEdit={openEdit}

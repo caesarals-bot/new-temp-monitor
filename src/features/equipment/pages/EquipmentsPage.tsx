@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/shared/components/ui/card';
 
 export function EquipmentsPage() {
   const {
-    canEdit, activeLocationId, activeLocationName, equipmentList,
+    canEdit, activeLocationId, activeLocationName, equipmentList, readingsCountByEquipment,
     isLoadingEquipment, equipmentError,
     dialog, editingEquipment, deletingEquipment,
     deleteReadingsCount, isLoadingDeleteCount, isMutating,
@@ -95,7 +95,7 @@ export function EquipmentsPage() {
               <EquipmentCard
                 key={equipment.id}
                 equipment={equipment}
-                readingsCount={0}
+                readingsCount={readingsCountByEquipment.get(equipment.id) ?? 0}
                 canEdit={canEdit}
                 onEdit={openEdit}
                 onDelete={openDelete}

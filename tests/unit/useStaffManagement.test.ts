@@ -76,6 +76,14 @@ beforeEach(() => {
     is_platform_admin: false,
     organization_id: 'org-1',
   };
+  (listStaffByLocation as ReturnType<typeof vi.fn>).mockResolvedValue({
+    data: [],
+    error: null,
+  });
+  (countStaffReadings as ReturnType<typeof vi.fn>).mockResolvedValue({
+    count: 0,
+    error: null,
+  });
 });
 
 describe('useStaffManagement · initial state', () => {

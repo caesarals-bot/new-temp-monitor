@@ -56,12 +56,17 @@ vi.mock('@/features/locations/services/locations.service', () => ({
   countLocationDependencies: vi.fn(),
 }));
 
+vi.mock('@/features/equipment/services/equipment.service', () => ({
+  listEquipmentByLocation: vi.fn(),
+}));
+
 import {
   createLocation,
   updateLocation,
   deleteLocation,
   countLocationDependencies,
 } from '@/features/locations/services/locations.service';
+import { listEquipmentByLocation } from '@/features/equipment/services/equipment.service';
 import { useLocationsManagement } from '@/features/locations/hooks/useLocationsManagement';
 import type { Location } from '@/shared/types/supabase';
 
@@ -93,6 +98,10 @@ beforeEach(() => {
     is_platform_admin: false,
     organization_id: 'org-1',
   };
+  (listEquipmentByLocation as ReturnType<typeof vi.fn>).mockResolvedValue({
+    data: [],
+    error: null,
+  });
 });
 
 describe('useLocationsManagement · initial state', () => {

@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
+import { listEquipmentByLocation } from '@/features/equipment/services/equipment.service';
 import {
   createLocation as createLocationService,
   updateLocation as updateLocationService,
@@ -31,6 +32,7 @@ export interface UseLocationsManagementReturn {
   maxLocations: number;
   planType: 'basic' | 'pro' | 'enterprise';
   isMutating: boolean;
+  equipmentCountByLocation: Map<string, number>;
 
   dialog: DialogMode;
   editingLocation: Location | null;
@@ -65,6 +67,9 @@ export function useLocationsManagement(): UseLocationsManagementReturn {
   const [isMutating, setIsMutating] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [equipmentCountByLocation, setEquipmentCountByLocation] = useState<Map<string, number>>(
+    new Map()
+  );
 
   const canEdit = canManageLocations(profile?.role);
   const orgId = organization?.id ?? null;
@@ -84,6 +89,32 @@ export function useLocationsManagement(): UseLocationsManagementReturn {
   const refreshLocations = useCallback(async () => {
     if (orgId) await fetchLocations(orgId);
   }, [orgId, fetchLocations]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (locations.length === 0) {
+      setEquipmentCountByLocation(new Map());
+      return () => {
+        cancelled = true;
+      };
+    }
+    void Promise.all(
+      locations.map((l) =>
+        listEquipmentByLocation(l.id).then(({ data, error }) => ({
+          id: l.id,
+          count: error ? 0 : (data ?? []).length,
+        }))
+      )
+    ).then((entries) => {
+      if (cancelled) return;
+      const map = new Map<string, number>();
+      for (const entry of entries) map.set(entry.id, entry.count);
+      setEquipmentCountByLocation(map);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [locations]);
 
   const openCreate = useCallback(() => {
     setFormError(null);
@@ -181,6 +212,7 @@ export function useLocationsManagement(): UseLocationsManagementReturn {
     maxLocations,
     planType,
     isMutating,
+    equipmentCountByLocation,
 
     dialog,
     editingLocation,

@@ -27,6 +27,7 @@ export interface UseStaffManagementReturn {
   activeLocationId: string | null;
   activeLocationName: string | null;
   staffList: Staff[];
+  readingsCountByStaff: Map<string, number>;
   isLoadingStaff: boolean;
   staffError: string | null;
 
@@ -55,6 +56,9 @@ export function useStaffManagement(): UseStaffManagementReturn {
   const locations = useOrganizationStore((s) => s.locations);
 
   const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [readingsCountByStaff, setReadingsCountByStaff] = useState<Map<string, number>>(
+    new Map()
+  );
   const [isLoadingStaff, setIsLoadingStaff] = useState(false);
   const [staffError, setStaffError] = useState<string | null>(null);
 
@@ -103,13 +107,34 @@ export function useStaffManagement(): UseStaffManagementReturn {
     setStaffError(null);
     void listStaffByLocation(activeLocationId).then(({ data, error }) => {
       if (cancelled) return;
-      setIsLoadingStaff(false);
       if (error) {
+        setIsLoadingStaff(false);
         setStaffError(mapStaffError(error.message));
         setStaffList([]);
+        setReadingsCountByStaff(new Map());
         return;
       }
-      setStaffList(data ?? []);
+      const staff = data ?? [];
+      setStaffList(staff);
+      if (staff.length === 0) {
+        setIsLoadingStaff(false);
+        setReadingsCountByStaff(new Map());
+        return;
+      }
+      void Promise.all(
+        staff.map((s) =>
+          countStaffReadingsService(s.id).then(({ count, error: e }) => ({
+            id: s.id,
+            count: e ? 0 : count ?? 0,
+          }))
+        )
+      ).then((entries) => {
+        if (cancelled) return;
+        const map = new Map<string, number>();
+        for (const entry of entries) map.set(entry.id, entry.count);
+        setReadingsCountByStaff(map);
+        setIsLoadingStaff(false);
+      });
     });
     return () => {
       cancelled = true;
@@ -210,6 +235,7 @@ export function useStaffManagement(): UseStaffManagementReturn {
     activeLocationId,
     activeLocationName,
     staffList,
+    readingsCountByStaff,
     isLoadingStaff,
     staffError,
 

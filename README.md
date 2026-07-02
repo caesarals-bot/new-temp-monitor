@@ -18,7 +18,7 @@ SaaS B2B multi-tenant para monitoreo de cadena de frío. PWA construida con Reac
 | Lenguaje | TypeScript 5.x (strict mode) |
 | Build | Vite 8.x |
 | Estilos | Tailwind CSS v4 (CSS-first) |
-| Routing | React Router v7 (SPA mode) |
+| Routing | React Router v8 (SPA mode) |
 | Estado global | Zustand 5.x |
 | Backend | Supabase (Auth + DB + RLS) |
 | UI | shadcn/ui (tema Operational Calm) |

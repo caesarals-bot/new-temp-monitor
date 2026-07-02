@@ -74,6 +74,14 @@ beforeEach(() => {
     is_platform_admin: false,
     organization_id: 'org-1',
   };
+  (listEquipmentByLocation as ReturnType<typeof vi.fn>).mockResolvedValue({
+    data: [],
+    error: null,
+  });
+  (countEquipmentReadings as ReturnType<typeof vi.fn>).mockResolvedValue({
+    count: 0,
+    error: null,
+  });
 });
 
 describe('useEquipmentManagement · initial state', () => {

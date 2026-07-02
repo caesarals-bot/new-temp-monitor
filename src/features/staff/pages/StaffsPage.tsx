@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/shared/components/ui/card';
 
 export function StaffsPage() {
   const {
-    canEdit, activeLocationId, activeLocationName, staffList,
+    canEdit, activeLocationId, activeLocationName, staffList, readingsCountByStaff,
     isLoadingStaff, staffError,
     dialog, editingStaff, togglingStaff,
     toggleReadingsCount, isLoadingToggleCount, isMutating,
@@ -95,7 +95,7 @@ export function StaffsPage() {
               <StaffCard
                 key={staff.id}
                 staff={staff}
-                readingsCount={0}
+                readingsCount={readingsCountByStaff.get(staff.id) ?? 0}
                 canEdit={canEdit}
                 onEdit={openEdit}
                 onToggle={openToggle}

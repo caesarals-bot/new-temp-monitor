@@ -30,6 +30,7 @@ export interface UseEquipmentManagementReturn {
   activeLocationId: string | null;
   activeLocationName: string | null;
   equipmentList: Equipment[];
+  readingsCountByEquipment: Map<string, number>;
   isLoadingEquipment: boolean;
   equipmentError: string | null;
 
@@ -57,6 +58,9 @@ export function useEquipmentManagement(): UseEquipmentManagementReturn {
   const locations = useOrganizationStore((s) => s.locations);
 
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
+  const [readingsCountByEquipment, setReadingsCountByEquipment] = useState<Map<string, number>>(
+    new Map()
+  );
   const [isLoadingEquipment, setIsLoadingEquipment] = useState(false);
   const [equipmentError, setEquipmentError] = useState<string | null>(null);
 
@@ -101,13 +105,34 @@ export function useEquipmentManagement(): UseEquipmentManagementReturn {
     setEquipmentError(null);
     void listEquipmentByLocation(activeLocationId).then(({ data, error }) => {
       if (cancelled) return;
-      setIsLoadingEquipment(false);
       if (error) {
+        setIsLoadingEquipment(false);
         setEquipmentError(mapEquipmentError(error.message));
         setEquipmentList([]);
+        setReadingsCountByEquipment(new Map());
         return;
       }
-      setEquipmentList(data ?? []);
+      const equipment = data ?? [];
+      setEquipmentList(equipment);
+      if (equipment.length === 0) {
+        setIsLoadingEquipment(false);
+        setReadingsCountByEquipment(new Map());
+        return;
+      }
+      void Promise.all(
+        equipment.map((eq) =>
+          countEquipmentReadingsService(eq.id).then(({ count, error: e }) => ({
+            id: eq.id,
+            count: e ? 0 : count ?? 0,
+          }))
+        )
+      ).then((entries) => {
+        if (cancelled) return;
+        const map = new Map<string, number>();
+        for (const entry of entries) map.set(entry.id, entry.count);
+        setReadingsCountByEquipment(map);
+        setIsLoadingEquipment(false);
+      });
     });
     return () => {
       cancelled = true;
@@ -210,6 +235,7 @@ export function useEquipmentManagement(): UseEquipmentManagementReturn {
     activeLocationId,
     activeLocationName,
     equipmentList,
+    readingsCountByEquipment,
     isLoadingEquipment,
     equipmentError,
 
