@@ -203,6 +203,11 @@ Una tarea a la vez. No iniciar siguiente hasta que anterior esté `COMPLETADA`.
 | ADR-004 | Servicios como funciones puras | Activa |
 | ADR-005 | Vitest + Testing Library | Activa |
 | ADR-006 | shadcn/ui + Operational Calm | Activa |
+| ADR-007 | `listByLocation` con 2 queries en vez de join anidado `!inner` | Activa |
+| ADR-008 | `STALE_THRESHOLD_MS = 2h` (HACCP) | Activa |
+| ADR-009 | Utilidades de tiempo con `now` inyectado (tests deterministas) | Activa |
+| ADR-010 | dev-bypass skip para Realtime (validar solo cleanup) | Activa |
+| ADR-011 | Contadores reales cableados en cards (cierre de placeholder 0) | Activa |
 
 ---
 
@@ -216,4 +221,6 @@ Una tarea a la vez. No iniciar siguiente hasta que anterior esté `COMPLETADA`.
 
 ## Tareas
 
-Ver `files/CHANGELOG.md` para historial y backlog.
+- **Backlog activo (próximas a ejecutar):** `files/BACKLOG.md` (TASK-010, TASK-011, TASK-012)
+- **Histórico de tareas cerradas:** `files/TASKS_HISTORY.md` (TASK-001 a TASK-009)
+- **Bitácora de ejecución (sesiones, decisiones, housekeeping):** `files/CHANGELOG.md`
