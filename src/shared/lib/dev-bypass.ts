@@ -12,7 +12,7 @@
  */
 
 import type { Session, User } from '@supabase/supabase-js';
-import type { Organization, Location, Profile, Incident, Staff, Equipment } from '@/shared/types/supabase';
+import type { Organization, Location, Profile, Incident, Staff, Equipment, TemperatureReading } from '@/shared/types/supabase';
 
 export const isDevBypassEnabled = (): boolean => {
   return import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
@@ -186,4 +186,44 @@ export function getDevMockIncidents(count: number = 3): Incident[] {
 
 export function getDevMockOpenIncidentCount(): number {
   return 3;
+}
+
+const TODAY = new Date('2026-07-01T08:00:00Z');
+const YESTERDAY = new Date('2026-06-30T16:00:00Z');
+
+function buildReading(
+  id: string,
+  equipmentId: string,
+  value: number,
+  recordedAt: Date,
+  recordedByStaff: string | null,
+  takenBy: string | null
+): TemperatureReading {
+  return {
+    id,
+    equipment_id: equipmentId,
+    value,
+    reading_type: 'manual',
+    sensor_battery: null,
+    sensor_signal: null,
+    snapshot_min_temp: null,
+    snapshot_max_temp: null,
+    recorded_by_profile: DEV_USER_ID,
+    recorded_by_staff: recordedByStaff,
+    taken_by: takenBy,
+    recorded_at: recordedAt.toISOString(),
+  };
+}
+
+export function getDevMockReadings(): TemperatureReading[] {
+  return [
+    buildReading('00000000-0000-0000-0000-000000000401', DEV_EQ_LOC1_A, 3.5, TODAY, DEV_STAFF_LOC1_A, null),
+    buildReading('00000000-0000-0000-0000-000000000402', DEV_EQ_LOC1_A, 8.2, YESTERDAY, DEV_STAFF_LOC1_B, null),
+    buildReading('00000000-0000-0000-0000-000000000403', DEV_EQ_LOC1_B, -18.0, TODAY, DEV_STAFF_LOC1_A, null),
+    buildReading('00000000-0000-0000-0000-000000000404', DEV_EQ_LOC1_C, 5.0, TODAY, null, 'Inspector de turno'),
+    buildReading('00000000-0000-0000-0000-000000000405', DEV_EQ_LOC2_A, 4.0, YESTERDAY, DEV_STAFF_LOC2_A, null),
+    buildReading('00000000-0000-0000-0000-000000000406', DEV_EQ_LOC2_A, 9.5, YESTERDAY, DEV_STAFF_LOC2_B, null),
+    buildReading('00000000-0000-0000-0000-000000000407', DEV_EQ_LOC2_B, -15.0, TODAY, DEV_STAFF_LOC2_A, null),
+    buildReading('00000000-0000-0000-0000-000000000408', DEV_EQ_LOC1_C, 2.5, YESTERDAY, DEV_STAFF_LOC1_B, null),
+  ];
 }
