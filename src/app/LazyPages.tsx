@@ -45,6 +45,12 @@ export const LazyIncidentsPage = lazy(() =>
   }))
 );
 
+export const LazyReportsPage = lazy(() =>
+  import('@/features/reports/pages/ReportsPage').then((m) => ({
+    default: m.ReportsPage,
+  }))
+);
+
 export function RouteFallback() {
   return (
     <div className="flex h-screen items-center justify-center">
@@ -53,9 +59,7 @@ export function RouteFallback() {
   );
 }
 
-export function withSuspense<P extends Record<string, unknown>>(
-  Component: React.ComponentType<P>
-) {
+export function withSuspense<P extends Record<string, unknown>>(Component: React.ComponentType<P>) {
   return function SuspendedPage(props: P) {
     return (
       <Suspense fallback={<RouteFallback />}>

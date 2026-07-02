@@ -4,7 +4,20 @@ import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
 import { useOrganizationBootstrap } from '@/features/organizations/hooks/useOrganizationBootstrap';
 import { useIncidentsBootstrap } from '@/features/incidents/hooks/useIncidentsBootstrap';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
-import { LazyLoginPage, LazyRegisterPage, LazyOnboardingPage, LazyDashboardPage, LazyLocationsPage, LazyStaffsPage, LazyEquipmentsPage, LazyReadingsPage, LazyReadingsHistoryPage, LazyIncidentsPage, RouteFallback } from '@/app/LazyPages';
+import {
+  LazyLoginPage,
+  LazyRegisterPage,
+  LazyOnboardingPage,
+  LazyDashboardPage,
+  LazyLocationsPage,
+  LazyStaffsPage,
+  LazyEquipmentsPage,
+  LazyReadingsPage,
+  LazyReadingsHistoryPage,
+  LazyIncidentsPage,
+  LazyReportsPage,
+  RouteFallback,
+} from '@/app/LazyPages';
 import { AppShell } from '@/shared/components/layout/AppShell';
 import { RoutePlaceholder } from '@/shared/components/layout/RoutePlaceholder';
 
@@ -82,7 +95,7 @@ function Router() {
               },
               {
                 path: 'reports',
-                element: <RoutePlaceholder title="Reportes" taskId="TASK-011" />,
+                element: lazyElement(LazyReportsPage),
               },
               {
                 path: 'settings',
