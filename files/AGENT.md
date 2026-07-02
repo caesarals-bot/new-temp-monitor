@@ -221,6 +221,45 @@ Una tarea a la vez. No iniciar siguiente hasta que anterior esté `COMPLETADA`.
 
 ## Tareas
 
-- **Backlog activo (próximas a ejecutar):** `files/BACKLOG.md` (TASK-010, TASK-011, TASK-012)
-- **Histórico de tareas cerradas:** `files/TASKS_HISTORY.md` (TASK-001 a TASK-009)
-- **Bitácora de ejecución (sesiones, decisiones, housekeeping):** `files/CHANGELOG.md`
+### Regla de oro de los archivos `files/*.md`
+
+Cada archivo tiene un único propósito. **Antes de proponer o ejecutar, lee solo lo necesario.**
+
+| Archivo | Contiene | NO contiene | Cuándo leerlo |
+|---|---|---|---|
+| **`AGENT.md`** (este) | Reglas, stack, ADRs, principios, alcance, convenciones | Detalle de tareas, sesiones | **Siempre al inicio** — define cómo trabajar |
+| **`files/BACKLOG.md`** | Tareas activas (PROPUESTA / APROBADA / EN PROGRESO) con criterios, archivos, tests | Tareas cerradas, sesiones | Al elegir próxima tarea o durante ejecución |
+| **`files/TASKS_HISTORY.md`** | Tareas cerradas (TASK-001..009) con su definición original | Sesiones, decisiones post-ejecución | Solo si necesitas saber qué definió una tarea ya hecha |
+| **`files/CHANGELOG.md`** | Bitácora de ejecución: sesiones, bloques, decisiones post-ejecución, housekeeping (H-XXX), P0 | Definición de tareas, ADRs | Al cerrar tarea o consultar decisiones/riesgos históricos |
+| **`files/DESIGN.md`** | Identidad visual (Operational Calm, tokens) | Lógica, arquitectura | Si la tarea toca UI/visual |
+| **`files/ARCHITECTURE.md`** | Decisiones técnicas de arquitectura, capas, patrones, anti-patrones | Tareas, sesiones | Si la tarea implementa feature nueva o hook complejo |
+| **`files/DATABASE_STRUCTURE.md`** | Schema Supabase, RLS, FKs, índices | Lógica de aplicación | Si la tarea modifica BD o consulta tablas |
+
+### Flujo del agente al inicio de sesión
+
+**Mínimo (siempre, para cualquier tarea):**
+1. `files/AGENT.md` — reglas, ADRs, alcance
+2. `files/BACKLOG.md` — siguiente tarea del backlog activo
+
+**Solo si la tarea lo requiere:**
+- UI nueva / cambio visual → `files/DESIGN.md`
+- Feature nuevo / hook / service → `files/ARCHITECTURE.md`
+- Modifica BD / query nueva → `files/DATABASE_STRUCTURE.md`
+
+**Solo al cierre de tarea o consulta histórica:**
+- `files/CHANGELOG.md` — para escribir la sesión, ver decisiones previas
+- `files/TASKS_HISTORY.md` — si necesitas referenciar una tarea cerrada
+
+### Anti-patrón: leer todo siempre
+
+NO leer `CHANGELOG.md` ni `TASKS_HISTORY.md` por defecto. Crecen con cada tarea y consumen tokens sin aportar a la decisión actual. Solo abrirlos cuando:
+- Estás cerrando la tarea actual (CHANGELOG para la sesión)
+- Necesitas el contexto histórico de una decisión puntual (TASKS_HISTORY para definición original, CHANGELOG para la decisión post-ejecución)
+
+### Backlog activo
+
+- **TASK-010** — Motor de incidentes + flujo HACCP (Alta, depende TASK-009 ✅)
+- **TASK-011** — Panel de reportes + PDF (Media, depende TASK-010)
+- **TASK-012** — Panel de platform admin (Baja, depende TASK-005 ✅)
+
+Detalle completo en `files/BACKLOG.md`. Tareas cerradas en `files/TASKS_HISTORY.md`.
