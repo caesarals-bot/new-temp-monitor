@@ -19,6 +19,7 @@
 | TASK-006b | CRUD de personal (staff) — soft delete + scoped por sede activa | 2026-07-01 | staff.service (6 fn: list/get/create/update/setActive/countReadings), schemas Zod, StaffCard/Header/FormDialog/ToggleDialog, StaffsPage con useStaffManagement hook, RBAC owner/admin/manager, soft delete via staff.active preservando lecturas, dev-bypass con 2 staff por sede, NavItem Personal agregado, 281 tests pasando |
 | TASK-007 | CRUD de equipos con rangos térmicos + scoped por sede activa | 2026-07-01 | equipment.service (6 fn: list/get/create/update/delete/countReadings), schemas Zod con refine min<max, EquipmentCard/Header/FormDialog/DeleteDialog, EquipmentsPage con useEquipmentManagement hook, RBAC owner/admin/manager, dev-bypass con 2-3 equipos por sede (refrigerador, congelador, vitrina), 364 tests pasando |
 | TASK-008 | Formulario de registro de lectura manual | 2026-07-01 | readings.service (4 fn: list/get/create/count), reading.schema Zod con refine rango físico, lib isOutOfRange pura + outOfRangeDirection, EquipmentSelector/TemperatureInput/StaffSelector presentacionales puros, ReadingForm RHF + Zod con feedback visual de out-of-range, useReadingForm hook con state machine idle/submitting/success/error, ReadingsPage composición con success card + link /readings/history, RBAC abierto a todos los roles, dev-bypass con 8 lecturas distribuidas, jsdom shims agregados (hasPointerCapture, scrollIntoView, ResizeObserver), 452 tests pasando |
+| TASK-009 | Dashboard de lecturas con estado en tiempo real | 2026-07-02 | readings.service (+3 fn: listByLocation/latest/countByLocation via 2 queries), lib timeSince pura + isStaleReading con STALE_THRESHOLD_MS=2h, useRealtimeReadings hook con supabase.channel + cleanup crítico de memory leak, LastReadingBadge/EquipmentStatusCard/EquipmentStatusGrid components con estados semánticos ok/alert/no-reading, ReadingsHistoryPage composición con header + grid + error banner, router /readings/history → dashboard (reemplaza placeholder), contadores reales cableados en LocationCard/StaffCard/EquipmentCard, README reemplazado del template Vite, dev-bypass con lectura 2-días-old para stale demo, 515 tests pasando |
 | DOC-001 | `files/ARCHITECTURE.md` — documentación técnica viva | 2026-07-01 | Principios, capas, estructura template de feature, stores, patrón CRUD, soft delete, manejo de errores, testing, dev-bypass, anti-patrones, commits convention |
 | P0-001 | Git + .gitignore + ramas | 2026-06-30 | main (base estable), develop (HEAD trabajo) |
 
@@ -36,6 +37,56 @@
 |----|--------|------|
 | H-001 | TASK-004 | Regenerar `src/shared/types/supabase.ts` desde Supabase para que la RPC `create_organization_with_owner` quede tipada. Hoy `auth.service.ts:21` usa `as string` para el retorno |
 | H-002 | TASK-005 | Anon key de Supabase fue referida textualmente en chat del agente. Rotar la key en Project Settings → API es opcional pero recomendable |
+
+---
+
+## Sesión 2026-07-02: cierre TASK-009
+
+### Alcance
+Cierra **TASK-009** (dashboard de lecturas con estado en tiempo real). 11 commits (B-prep-README, B-prep-mocks, B1..B9, B10-doc). 63 tests nuevos, total 515 pasando.
+
+### Bloques ejecutados
+- **B-prep-README** docs: `docs: replace Vite template README with TempMonitor project README`
+- **B-prep-mocks** mocks: `chore(dev-bypass): adjust readings mock for dashboard diversity` (Vitrina ahora con lectura 2-días-old)
+- **B1** service: `feat(readings): service extensions listByLocation + latest + countByLocation + tests`
+- **B2** lib: `feat(readings): timeSince helper + isStaleReading + tests`
+- **B3** hook: `feat(readings): useRealtimeReadings hook with cleanup + tests`
+- **B4** component: `feat(readings): LastReadingBadge component + tests`
+- **B5** component: `feat(readings): EquipmentStatusCard with semantic states + tests`
+- **B6** component: `feat(readings): EquipmentStatusGrid + empty state + tests`
+- **B7** page: `feat(readings): ReadingsHistoryPage composicion + tests`
+- **B8** router: `feat(readings): router /readings/history → ReadingsHistoryPage (lazy)`
+- **B9** contadores: `feat(domains): cablear contadores reales en cards` (Location/Staff/Equipment)
+
+### Decisiones de diseno aplicadas (vivas)
+- **`listByLocation` con 2 queries en vez de `!inner` join:** PostgREST nested filter con `equipment:equipment_id!inner(location_id)` cambia la forma del row. Preferimos 2 queries (equipment IDs → readings) para mantener el tipo `TemperatureReading` puro y tests deterministas.
+- **`latestByEquipment` con `maybeSingle()`:** distinto de `single()`, retorna `data: null` cuando no hay filas, sin error. Crítico para equipos sin lecturas.
+- **`timeSince` como utility pura con `now` inyectado:** permite tests deterministas sin depender del reloj del sistema. 13 tests cubriendo bordes (59s/60s/24h/7d/30d).
+- **`STALE_THRESHOLD_MS = 2h` (HACCP):** exportado desde `timeSince.ts` para que TASK-011 (reportes) lo reuse sin divergencia.
+- **`isStaleReading` separada de `formatTimeSince`:** dos funciones puras con un mismo `now`, evitando mezclar presentación y estado. `LastReadingBadge` consume ambas.
+- **`useRealtimeReadings` cleanup crítico:** test explícito verifica `removeChannel` en unmount y en cambio de `locationId`. En dev-bypass retorna empty map (sin channel), no se mockea.
+- **`EquipmentStatusCard` con 3 estados:** `ok` (dentro de rango, fresh) / `alert` (fuera de rango) / `no-reading` (sin lecturas). El "stale" (>2h) es un detalle visual del badge, no un estado de la card — un equipo con lectura fresca pero vieja sigue siendo `ok` operativamente.
+- **`ReadingsHistoryPage` composición pura:** combina `useRealtimeReadings` + `listReadingsByLocation` vía `useMemo` que mergea el map inicial con updates realtime, sin lógica de negocio nueva. Pattern reusable para TASK-010.
+- **Realtime en dev-bypass = skip:** confirmado en plan mode. El channel real de Supabase requiere realtime habilitado en el proyecto; con mocks se valida solo el cleanup.
+- **Contadores reales cableados en cards:** `LocationCard` ahora cuenta equipment por location (Promise.all sobre `listEquipmentByLocation`). `StaffCard` cuenta readings por staff. `EquipmentCard` cuenta readings por equipo. Cierra el placeholder `0` pendiente desde TASK-007/008.
+- **`outIncidentCount` sigue en 0 en `LocationCard`:** se mantiene placeholder hasta TASK-010 cuando `useIncidentStore` traiga datos por location. Hoy la lógica vive en el store global.
+- **`useReadingForm` no se tocó:** el form de TASK-008 sigue su flujo; `ReadingsHistoryPage` es nueva página paralela.
+
+### Risgos / pendientes tecnicos
+- **H-001:** persiste — `as string` en `auth.service.ts:21`. No introducido por TASK-009.
+- **H-002:** persiste — anon key sin rotar.
+- **H-003:** persiste — errores preexistentes de `tsc`. TASK-009 no agregó nuevos.
+- **Realtime de incidents:** sigue siendo noop. TASK-010 lo implementa (no TASK-009, decisión de scope confirmada en plan mode).
+- **Snapshot min/max al insertar:** sigue pendiente para TASK-010. TASK-009 solo lee.
+- **Panel de incidentes:** no está en `ReadingsHistoryPage`. Decisión de scope confirmada: queda para TASK-010 que crea el feature `incidents`.
+- **`useIncidentsBootstrap` mock data:** el badge de incidentes en sidebar sigue mostrando 3 hardcodeados (dev-bypass). TASK-010 lo reemplaza.
+- **`2 queries` para `listByLocation`:** en V1 con 1-50 equipos/sede es aceptable. Si crece, se puede cambiar a vista SQL o RPC agregado.
+
+### Pendientes (siguiente tarea logica)
+**TASK-010** (motor de detección de incidentes + flujo HACCP, prioridad Alta) tiene dependencias satisfechas: TASK-009 ✅, TASK-008 ✅. Aquí se cablea `snapshot_min/max_temp` al insertar readings out-of-range y se implementa `useIncidentStore.subscribeRealtime`.
+
+### Siguiente tarea logica
+**TASK-010** — Inicia el feature `incidents`. Reusar `isOutOfRange` de `features/readings/lib/` para la detección. Crear `incidents.service`, `incident.store`, `IncidentList`/`IncidentCard`/`IncidentResolutionModal` con RLS. Cablear `useIncidentsBootstrap` a channel real de `incidents`. Cablear `outIncidentCount` en `LocationCard`. Poblar `snapshot_min/max_temp` en `createReading` cuando hay out-of-range.
 
 ---
 
@@ -148,7 +199,7 @@ depende de TASK-005 (AppShell) y esta ya commiteada.
 | ~~TASK-006b~~ | ~~CRUD de personal (staff)~~ ✅ ver Completadas | — | staff | TASK-005 |
 | ~~TASK-007~~ | ~~CRUD de equipos con rangos térmicos~~ ✅ ver Completadas | — | equipment | TASK-006 |
 | ~~TASK-008~~ | ~~Formulario de registro de lectura manual~~ ✅ ver Completadas | — | readings | TASK-007 |
-| TASK-009 | Dashboard de lecturas con estado en tiempo real (Supabase realtime) | Alta | readings | TASK-008 |
+| ~~TASK-009~~ | ~~Dashboard de lecturas con estado en tiempo real~~ ✅ ver Completadas | — | readings | TASK-008 |
 | TASK-010 | Motor de detección de incidentes + flujo HACCP | Alta | incidents | TASK-009 |
 | TASK-011 | Panel de reportes con filtros y exportación PDF | Media | reports | TASK-010 |
 | TASK-012 | Panel de platform admin (super admin) | Baja | platform-admin | TASK-005 |
