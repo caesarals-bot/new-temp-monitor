@@ -5,9 +5,14 @@ import { useAuthStore } from '@/features/auth/store/auth.store';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireOnboarding?: boolean;
+  requirePlatformAdmin?: boolean;
 }
 
-export function ProtectedRoute({ children, requireOnboarding = true }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requireOnboarding = true,
+  requirePlatformAdmin = false,
+}: ProtectedRouteProps) {
   const session = useAuthStore((s) => s.session);
   const profile = useAuthStore((s) => s.profile);
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -26,6 +31,10 @@ export function ProtectedRoute({ children, requireOnboarding = true }: Protected
 
   if (requireOnboarding && !profile?.organization_id && !profile?.is_platform_admin) {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  if (requirePlatformAdmin && !profile?.is_platform_admin) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
