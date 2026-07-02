@@ -191,16 +191,12 @@ depende de TASK-005 (AppShell) y esta ya commiteada.
 
 ## Pendientes
 
+> Las tareas abiertas del backlog están en `files/BACKLOG.md` (TASK-010, TASK-011, TASK-012).
+> Este archivo es histórico. El "siguiente tarea lógica" se documenta al final de la última sesión.
+
 | ID | Tarea | Prioridad | Módulo | Depende de |
 |----|-------|-----------|--------|------------|
-| ~~TASK-004~~ | ~~Onboarding guiado~~ ✅ ver Completadas | — | auth | TASK-003 |
-| ~~TASK-005~~ | ~~AppShell con RBAC~~ ✅ ver Completadas | — | shared | TASK-003 |
-| ~~TASK-006~~ | ~~CRUD de sedes con límite por plan~~ ✅ ver Completadas | — | locations | TASK-005 |
-| ~~TASK-006b~~ | ~~CRUD de personal (staff)~~ ✅ ver Completadas | — | staff | TASK-005 |
-| ~~TASK-007~~ | ~~CRUD de equipos con rangos térmicos~~ ✅ ver Completadas | — | equipment | TASK-006 |
-| ~~TASK-008~~ | ~~Formulario de registro de lectura manual~~ ✅ ver Completadas | — | readings | TASK-007 |
-| ~~TASK-009~~ | ~~Dashboard de lecturas con estado en tiempo real~~ ✅ ver Completadas | — | readings | TASK-008 |
-| TASK-010 | Motor de detección de incidentes + flujo HACCP | Alta | incidents | TASK-009 |
+| TASK-010 | Motor de detección de incidentes + flujo HACCP | Alta | incidents | TASK-009 ✅ |
 | TASK-011 | Panel de reportes con filtros y exportación PDF | Media | reports | TASK-010 |
 | TASK-012 | Panel de platform admin (super admin) | Baja | platform-admin | TASK-005 |
 
@@ -214,29 +210,3 @@ depende de TASK-005 (AppShell) y esta ya commiteada.
 | P0-002 | CI/CD (GitHub Actions) | Pendiente | Requiere cuenta Git |
 | P0-003 | .env.local (variables Supabase) | ✅ Completada | `.env.local` creado con credenciales |
 | P0-004 | Deploy staging | Pendiente | Decidir provider post-proyecto |
-
----
-
-## Registro de Tarea Completa
-
-```markdown
-## TASK-XXX — Nombre de la tarea
-
-**Módulo:** [auth | locations | equipment | readings | incidents | reports | platform-admin | shared]
-**Prioridad:** Alta / Media / Baja
-**Depende de:** TASK-YYY (si aplica)
-**Estimación:** S / M / L (Small ≤ 2h, Medium ≤ 4h, Large ≤ 8h)
-
-### Descripción
-Qué se construye y por qué.
-
-### Criterios de aceptación
-- [ ] Criterio verificable 1
-- [ ] Criterio verificable 2
-
-### Archivos afectados
-- src/features/xxx/...
-
-### Tests requeridos
-- Qué se debe testear en esta tarea
-```
