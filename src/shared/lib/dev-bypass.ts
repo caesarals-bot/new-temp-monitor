@@ -190,6 +190,7 @@ export function getDevMockOpenIncidentCount(): number {
 
 const TODAY = new Date('2026-07-01T08:00:00Z');
 const YESTERDAY = new Date('2026-06-30T16:00:00Z');
+const TWO_DAYS_AGO = new Date('2026-06-29T10:00:00Z');
 
 function buildReading(
   id: string,
@@ -224,6 +225,6 @@ export function getDevMockReadings(): TemperatureReading[] {
     buildReading('00000000-0000-0000-0000-000000000405', DEV_EQ_LOC2_A, 4.0, YESTERDAY, DEV_STAFF_LOC2_A, null),
     buildReading('00000000-0000-0000-0000-000000000406', DEV_EQ_LOC2_A, 9.5, YESTERDAY, DEV_STAFF_LOC2_B, null),
     buildReading('00000000-0000-0000-0000-000000000407', DEV_EQ_LOC2_B, -15.0, TODAY, DEV_STAFF_LOC2_A, null),
-    buildReading('00000000-0000-0000-0000-000000000408', DEV_EQ_LOC1_C, 2.5, YESTERDAY, DEV_STAFF_LOC1_B, null),
+    buildReading('00000000-0000-0000-0000-000000000408', DEV_EQ_LOC1_C, 2.5, TWO_DAYS_AGO, DEV_STAFF_LOC1_B, null),
   ];
 }
