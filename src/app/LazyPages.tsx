@@ -29,6 +29,10 @@ export const LazyEquipmentsPage = lazy(() =>
   import('@/features/equipment/pages/EquipmentsPage').then((m) => ({ default: m.EquipmentsPage }))
 );
 
+export const LazyReadingsPage = lazy(() =>
+  import('@/features/readings/pages/ReadingsPage').then((m) => ({ default: m.ReadingsPage }))
+);
+
 export function RouteFallback() {
   return (
     <div className="flex h-screen items-center justify-center">

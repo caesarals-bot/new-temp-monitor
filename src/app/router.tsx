@@ -4,7 +4,7 @@ import { useAuthBootstrap } from '@/features/auth/hooks/useAuthBootstrap';
 import { useOrganizationBootstrap } from '@/features/organizations/hooks/useOrganizationBootstrap';
 import { useIncidentsBootstrap } from '@/features/incidents/hooks/useIncidentsBootstrap';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
-import { LazyLoginPage, LazyRegisterPage, LazyOnboardingPage, LazyDashboardPage, LazyLocationsPage, LazyStaffsPage, LazyEquipmentsPage, RouteFallback } from '@/app/LazyPages';
+import { LazyLoginPage, LazyRegisterPage, LazyOnboardingPage, LazyDashboardPage, LazyLocationsPage, LazyStaffsPage, LazyEquipmentsPage, LazyReadingsPage, RouteFallback } from '@/app/LazyPages';
 import { AppShell } from '@/shared/components/layout/AppShell';
 import { RoutePlaceholder } from '@/shared/components/layout/RoutePlaceholder';
 
@@ -70,7 +70,11 @@ function Router() {
               },
               {
                 path: 'readings',
-                element: <RoutePlaceholder title="Lecturas" taskId="TASK-008" />,
+                element: lazyElement(LazyReadingsPage),
+              },
+              {
+                path: 'readings/history',
+                element: <RoutePlaceholder title="Historial de lecturas" taskId="TASK-009" />,
               },
               {
                 path: 'incidents',
