@@ -263,12 +263,13 @@ depende de TASK-005 (AppShell) y esta ya commiteada.
 
 ## P0 Pendientes
 
-| ID     | Tarea                           | Estado        | Nota                                 |
-| ------ | ------------------------------- | ------------- | ------------------------------------ |
-| P0-001 | Git + .gitignore + ramas        | ✅ Completada |                                      |
-| P0-002 | CI/CD (GitHub Actions)          | Pendiente     | Requiere cuenta Git                  |
-| P0-003 | .env.local (variables Supabase) | ✅ Completada | `.env.local` creado con credenciales |
-| P0-004 | Deploy staging                  | Pendiente     | Decidir provider post-proyecto       |
+| ID     | Tarea                            | Estado        | Nota                                                        |
+| ------ | -------------------------------- | ------------- | ----------------------------------------------------------- |
+| P0-001 | Git + .gitignore + ramas         | ✅ Completada |                                                             |
+| P0-002 | CI/CD (GitHub Actions)           | Pendiente     | Requiere cuenta Git                                         |
+| P0-003 | .env.local (variables Supabase)  | ✅ Completada | `.env.local` creado con credenciales                        |
+| P0-004 | Deploy staging                   | Pendiente     | Decidir provider post-proyecto                              |
+| P0-005 | Version 1.0.0-rc1 — merge a main | ✅ Completada | V1 cerrada en código, RC taggeado. H-003 + H-004 pendientes |
 
 ---
 
@@ -371,6 +372,76 @@ Cierra **TASK-012** (panel de platform admin). **6 commits granulares** (1 por b
 ### Siguiente tarea lógica
 
 Decisión pendiente: housekeeping vs features V2 vs cierre. Recomiendo **housekeeping primero** (H-003 = build limpio, H-004 = RLS platform_admin) antes de tocar features nuevas. Es la base técnica que evita acumular más deuda.
+
+---
+
+## Sesión 2026-07-02: merge V1 → main + tag v1.0.0-rc1
+
+### Alcance
+
+Mergea V1 completo a `main`, pushea y taggea como release candidate.
+NO incluye cierre de H-003 ni H-004 (quedan pendientes para sesiones futuras).
+
+### Ejecutado
+
+- Push de `develop` (9 commits ahead de `origin/develop`)
+- Merge `develop → main` con `--no-ff` (preserva historia visual del cierre V1)
+- Push a `origin/main` (merge commit `c5ce098`)
+- Tag anotado `v1.0.0-rc1` pusheado a `origin`
+
+### Estado al cierre
+
+- ✅ 619/619 tests verde en `main`
+- ✅ Backend Supabase real conectado (credenciales en `.env.local`, NO commiteadas)
+- ✅ Tag `v1.0.0-rc1` marca hito del MVP
+- ⚠️ H-003 (build errors preexistentes): PENDIENTE — `pnpm build` falla por `PostgrestError` no exportado + RHF generics en 4 dialogs
+- ⚠️ H-004 (RLS policies platform_admin): PENDIENTE — `001_initial_schema.sql` tiene policies de tenant pero falta policy para `is_platform_admin`
+- ❌ Seed script: PENDIENTE — no creado, falta `SUPABASE_SERVICE_ROLE_KEY` en `.env.local`
+- ❌ Smoke test E2E: PENDIENTE — requiere seed + Supabase real
+
+### Significado del tag v1.0.0-rc1
+
+V1 está cerrada en código (12 tareas completadas, 619 tests). Pero NO es estable:
+
+- Build falla (H-003) → no se puede deployar a staging sin cerrar H-003 primero
+- Sin policies RLS para platform_admin en BD → queries reales pueden fallar
+- Sin seed → no hay datos reales para probar contra Supabase
+- Sin smoke test → funcionalidad end-to-end no validada
+
+`v1.0.0` (sin -rc) se taggea cuando todas las anteriores estén cerradas.
+
+### Branch policy
+
+- `main` ahora es la rama estable (con deuda H-003 + H-004 visible)
+- `develop` queda sincronizada (0 commits ahead de main post-merge)
+- PRs futuros: feature branch → develop → main
+
+### Roadmap inmediato (3 sesiones planeadas)
+
+1. **Sesión +1: cerrar H-003** (1 commit enfocado, ~80 min)
+   - Exportar `PostgrestError` desde `supabase.ts`
+   - Cambiar 5 services a importar el tipo real (sin workaround local)
+   - Tipar RHF generics en 4 dialogs (`LocationFormDialog`, `EquipmentFormDialog`, `ReadingForm`, `StaffFormDialog`)
+   - Investigar comparación `number === string` en `ReadingForm.tsx:137`
+   - Exportar `Location` en `locations.service.ts`
+   - Verificar `pnpm build` limpio + `pnpm test` 619/619
+
+2. **Sesión +2: cerrar H-004** (1-2 commits, ~60 min)
+   - Crear `supabase/migrations/002_platform_admin_policies.sql`
+   - Función helper `is_platform_admin()` SECURITY DEFINER STABLE
+   - Policies SELECT/UPDATE para `organizations` (cross-tenant)
+   - Policies SELECT para `locations`, `profiles`, `equipment` (metadata)
+   - Policy restrictiva para `incidents` (vía vista SQL para counts sin description)
+   - NO policy para `temperature_readings` (cumple BACKLOG: admin NO ve datos de temp)
+
+3. **Sesión +3: seed + smoke test → v1.0.0 estable** (2 commits, ~150 min)
+   - Vos agregás `SUPABASE_SERVICE_ROLE_KEY` a `.env.local`
+   - Crear `scripts/seed-supabase.mjs` (idempotente, 2 orgs, 2 users, 6 equipos, 20 readings, 4-6 incidents)
+   - Aplicar 3 migrations (000/001/002) en Supabase real via SQL Editor
+   - Correr seed
+   - Login como `owner@empresademo.cl` + `admin@tempmonitor.dev` con passwords del seed
+   - Smoke test E2E: dashboard, panel admin, report PDF
+   - Si OK → bump version `1.0.0` + tag `v1.0.0` (cierre formal)
 
 ---
 
