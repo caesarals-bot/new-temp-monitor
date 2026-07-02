@@ -16,6 +16,9 @@ import {
   LazyReadingsHistoryPage,
   LazyIncidentsPage,
   LazyReportsPage,
+  LazyPlatformAdminPage,
+  LazyPlatformMetricsPage,
+  LazyOrganizationDetailPage,
   RouteFallback,
 } from '@/app/LazyPages';
 import { AppShell } from '@/shared/components/layout/AppShell';
@@ -103,11 +106,27 @@ function Router() {
               },
               {
                 path: 'admin/organizations',
-                element: <RoutePlaceholder title="Organizaciones" taskId="TASK-012" />,
+                element: (
+                  <ProtectedRoute requirePlatformAdmin>
+                    {lazyElement(LazyPlatformAdminPage)}
+                  </ProtectedRoute>
+                ),
+              },
+              {
+                path: 'admin/organizations/:id',
+                element: (
+                  <ProtectedRoute requirePlatformAdmin>
+                    {lazyElement(LazyOrganizationDetailPage)}
+                  </ProtectedRoute>
+                ),
               },
               {
                 path: 'admin/metrics',
-                element: <RoutePlaceholder title="Métricas globales" taskId="TASK-012" />,
+                element: (
+                  <ProtectedRoute requirePlatformAdmin>
+                    {lazyElement(LazyPlatformMetricsPage)}
+                  </ProtectedRoute>
+                ),
               },
             ],
           },

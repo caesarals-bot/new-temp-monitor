@@ -51,6 +51,24 @@ export const LazyReportsPage = lazy(() =>
   }))
 );
 
+export const LazyPlatformAdminPage = lazy(() =>
+  import('@/features/platform-admin/pages/PlatformAdminPage').then((m) => ({
+    default: m.PlatformAdminPage,
+  }))
+);
+
+export const LazyPlatformMetricsPage = lazy(() =>
+  import('@/features/platform-admin/pages/PlatformMetricsPage').then((m) => ({
+    default: m.PlatformMetricsPage,
+  }))
+);
+
+export const LazyOrganizationDetailPage = lazy(() =>
+  import('@/features/platform-admin/pages/OrganizationDetailPage').then((m) => ({
+    default: m.OrganizationDetailPage,
+  }))
+);
+
 export function RouteFallback() {
   return (
     <div className="flex h-screen items-center justify-center">
