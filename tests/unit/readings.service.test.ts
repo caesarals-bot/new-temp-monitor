@@ -130,12 +130,16 @@ describe('readings.service · createReading', () => {
       recordedByProfile: 'u-1',
       recordedByStaff: 's-1',
       takenBy: null,
+      snapshotMin: 2,
+      snapshotMax: 8,
     });
 
     expect(insert).toHaveBeenCalledWith({
       equipment_id: 'eq-1',
       value: 3.5,
       reading_type: 'manual',
+      snapshot_min_temp: 2,
+      snapshot_max_temp: 8,
       recorded_by_profile: 'u-1',
       recorded_by_staff: 's-1',
       taken_by: null,
@@ -155,12 +159,16 @@ describe('readings.service · createReading', () => {
       recordedByStaff: null,
       takenBy: 'Inspector de turno',
       recordedAt: '2026-07-01T08:00:00Z',
+      snapshotMin: -22,
+      snapshotMax: -15,
     });
 
     expect(insert).toHaveBeenCalledWith(
       expect.objectContaining({
         recorded_at: '2026-07-01T08:00:00Z',
         taken_by: 'Inspector de turno',
+        snapshot_min_temp: -22,
+        snapshot_max_temp: -15,
       })
     );
   });
@@ -177,6 +185,8 @@ describe('readings.service · createReading', () => {
       recordedByProfile: null,
       recordedByStaff: null,
       takenBy: null,
+      snapshotMin: 2,
+      snapshotMax: 8,
     });
 
     expect(data).toBeNull();

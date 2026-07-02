@@ -20,6 +20,7 @@
 | TASK-007 | CRUD de equipos con rangos térmicos + scoped por sede activa | 2026-07-01 | equipment.service (6 fn: list/get/create/update/delete/countReadings), schemas Zod con refine min<max, EquipmentCard/Header/FormDialog/DeleteDialog, EquipmentsPage con useEquipmentManagement hook, RBAC owner/admin/manager, dev-bypass con 2-3 equipos por sede (refrigerador, congelador, vitrina), 364 tests pasando |
 | TASK-008 | Formulario de registro de lectura manual | 2026-07-01 | readings.service (4 fn: list/get/create/count), reading.schema Zod con refine rango físico, lib isOutOfRange pura + outOfRangeDirection, EquipmentSelector/TemperatureInput/StaffSelector presentacionales puros, ReadingForm RHF + Zod con feedback visual de out-of-range, useReadingForm hook con state machine idle/submitting/success/error, ReadingsPage composición con success card + link /readings/history, RBAC abierto a todos los roles, dev-bypass con 8 lecturas distribuidas, jsdom shims agregados (hasPointerCapture, scrollIntoView, ResizeObserver), 452 tests pasando |
 | TASK-009 | Dashboard de lecturas con estado en tiempo real | 2026-07-02 | readings.service (+3 fn: listByLocation/latest/countByLocation via 2 queries), lib timeSince pura + isStaleReading con STALE_THRESHOLD_MS=2h, useRealtimeReadings hook con supabase.channel + cleanup crítico de memory leak, LastReadingBadge/EquipmentStatusCard/EquipmentStatusGrid components con estados semánticos ok/alert/no-reading, ReadingsHistoryPage composición con header + grid + error banner, router /readings/history → dashboard (reemplaza placeholder), contadores reales cableados en LocationCard/StaffCard/EquipmentCard, README reemplazado del template Vite, dev-bypass con lectura 2-días-old para stale demo, 515 tests pasando |
+| TASK-010 | Motor de incidentes y flujo HACCP | 2026-07-02 | incidents.service (listIncidents con filtros + 2 queries por location ADR-007, resolveIncident con action_taken/resolved_by/resolved_at, createIncidentFromReading, buildIncidentDescription helper), schemas Zod (resolveIncidentSchema con actionTaken min 20 chars), incident.store con openIncidents + openIncidentsByLocation + subscribeRealtime único por org (idempotente) + upsertIncident/removeIncident + 4 selectores granulares, useIncidentsBootstrap ahora monta channel real con cleanup (skip en dev-bypass ADR-010), useIncidents hook con state machine de filtros + modal resolving + RBAC owner/admin/manager + errores separados (listError/resolveError), IncidentCard con tooltip "solo owner/admin/manager" para staff, IncidentList con sort abiertos-primero, IncidentFiltersBar con select status/location + clear, IncidentResolutionModal con RHF+Zod (textarea actionTaken), IncidentsPage composición + LazyPages + router, cierre TASK-008 con snapshot_min/max_temp en createReading, cierre TASK-006 con openIncidentCount real en LocationCard (ADR-011), eliminación getDevMockOpenIncidentCount (dead code), 41 tests nuevos (schema:7 + service:10 + store:19 + useIncidents:13), 556 tests pasando |
 | DOC-001 | `files/ARCHITECTURE.md` — documentación técnica viva | 2026-07-01 | Principios, capas, estructura template de feature, stores, patrón CRUD, soft delete, manejo de errores, testing, dev-bypass, anti-patrones, commits convention |
 | P0-001 | Git + .gitignore + ramas | 2026-06-30 | main (base estable), develop (HEAD trabajo) |
 
@@ -86,9 +87,47 @@ Cierra **TASK-009** (dashboard de lecturas con estado en tiempo real). 11 commit
 **TASK-010** (motor de detección de incidentes + flujo HACCP, prioridad Alta) tiene dependencias satisfechas: TASK-009 ✅, TASK-008 ✅. Aquí se cablea `snapshot_min/max_temp` al insertar readings out-of-range y se implementa `useIncidentStore.subscribeRealtime`.
 
 ### Siguiente tarea logica
-**TASK-010** — Inicia el feature `incidents`. Reusar `isOutOfRange` de `features/readings/lib/` para la detección. Crear `incidents.service`, `incident.store`, `IncidentList`/`IncidentCard`/`IncidentResolutionModal` con RLS. Cablear `useIncidentsBootstrap` a channel real de `incidents`. Cablear `outIncidentCount` en `LocationCard`. Poblar `snapshot_min/max_temp` en `createReading` cuando hay out-of-range.
+**TASK-010** ✅ cerrada en la sesión siguiente. **TASK-011** (panel de reportes, prioridad Media) es la próxima — reusar `isOutOfRange` y `STALE_THRESHOLD_MS` de features/readings/lib/ para cálculo de cumplimiento y estado stale.
 
 ---
+
+## Sesión 2026-07-02: cierre TASK-010
+
+### Alcance
+Cierra **TASK-010** (motor de incidentes + flujo HACCP). **1 commit único** consolidado (decisión de scope acordada en plan mode con César). 41 tests nuevos, total 556 pasando.
+
+### Bloques ejecutados
+- **feat(incidents)** consolidado: TASK-010 motor de incidentes + flujo HACCP — incluye service + schemas + store con realtime + bootstrap + hook + componentes + page + router + cableado de snapshots en readings + cableado de openIncidentCount en LocationCard + eliminación de getDevMockOpenIncidentCount + 4 archivos de tests
+
+### Decisiones de diseño aplicadas (vivas)
+- **`openIncidentsByLocation: Map<locationId, number>` como índice derivado en el store:** alternativa a una query adicional por cada LocationCard. Se actualiza en `fetchOpenIncidents`, `upsertIncident`, `removeIncident`. Selectores granulares (`selectOpenIncidentsByLocation`) permiten que un card no se re-renderice cuando cambia otra sede.
+- **`subscribeRealtime` único por org + idempotente:** el channel `incidents:org:<orgId>` se monta UNA sola vez por sesión desde `useIncidentsBootstrap`. Si se vuelve a llamar con el mismo `orgId`, retorna cleanup vacío. En dev-bypass, retorna noop (ADR-010). En cualquier INSERT/UPDATE/DELETE de la tabla `incidents`, refetchea la lista (más simple que patch incremental, garantiza consistencia con la BD).
+- **Creación del incidente desde `useReadingForm` con detección `isOutOfRange`:** opción B del plan (sin trigger SQL). Tras INSERT exitoso de la reading, si está out-of-range se llama `createIncidentFromReading` con descripción auto-generada por `buildIncidentDescription` (usa `outOfRangeDirection` para "supera" vs "bajo"). Luego refetch del store para que el badge de sidebar y el LocationCard reflejen el nuevo incidente.
+- **Snapshots `snapshot_min/max_temp` cableados al insert:** cierre del pendiente heredado de TASK-008. El caller (`useReadingForm`) provee `snapshotMin`/`snapshotMax` desde el `equipment` ya cargado en memoria. Service puro recibe como parámetros (decisión B del plan). Garante de trazabilidad HACCP cuando el rango del equipo cambie post-registro.
+- **RBAC por props (`canResolve`) en `IncidentCard`:** el hook deriva `canResolve` desde `profile?.role` (owner/admin/manager). El componente recibe el flag. Para `staff`, el botón "Resolver" se renderiza deshabilitado dentro de un `<Tooltip>` con la explicación. Patrón consistente con `LocationCard`/`canEdit`.
+- **Errores separados `listError` vs `resolveError`:** el modal tiene su propio estado de error y no contamina la lista. Cierra el anti-patrón #5 de ARCHITECTURE.md.
+- **`action_taken` mínimo 20 caracteres (Zod refine):** garantiza acción correctiva con suficiente detalle para auditoría HACCP/ISP. Mensaje custom: "La acción correctiva debe tener al menos 20 caracteres". Test cubre: vacío, <20, exactamente 20, trim, >1000, missing.
+- **`buildIncidentDescription` con `outOfRangeDirection`:** mensajes específicos ("supera el rango" vs "está bajo el rango") en lugar de genérico "fuera de rango". Reusa `outOfRangeDirection` de TASK-008 (sin duplicación).
+- **`useRealtimeIncidents.ts` NO se creó como archivo separado:** confirmado en plan mode. La subscripción vive en `incident.store.subscribeRealtime(orgId)` y se monta desde `useIncidentsBootstrap`. La query en sí la hace `useIncidents` con `listIncidents` + filtros vigentes (no hay un canal separado para la página).
+- **Test visual checkpoint (sub-paso 11) confirmado por César:** badge sidebar, lista, filtros, resolución como owner/admin/manager, resolución como staff (tooltip), creación de incidente real desde `ReadingForm` con temperatura out-of-range.
+
+### Tests añadidos
+- `tests/unit/incident.schema.test.ts` — 7 tests: actionTaken ≥20, exactamente 20, vacío, <20, trim, >1000, missing
+- `tests/unit/incidents.service.test.ts` — 10 tests: buildIncidentDescription (3), resolveIncident (2: success+error), createIncidentFromReading (1), listIncidents (4: empty location, filtros, error, sin filtros)
+- `tests/unit/incident.store.test.ts` — 19 tests: fetchOpenIncidents (4), subscribeRealtime (4: empty/noop/dev-bypass/cleanup/idempotente), upsertIncident (4), removeIncident (2), reset (1), selectores (4)
+- `tests/unit/useIncidents.test.ts` — 13 tests: RBAC (4), fetching (5), resolution (4)
+
+### Riesgos / pendientes técnicos
+- **H-001, H-002, H-003:** persisten sin cambios. TASK-010 no los empeora: el service de incidents usa `PostgrestError` como tipo local inline para no sumar al problema de H-003 (import roto del repo). Cerrar H-003 queda fuera del scope TASK-010.
+- **`pnpm build` con errores preexistentes:** `tsc -b` falla por errores que existían antes de TASK-010 (PostgrestError no exportado en supabase.ts, RHF generics en LocationFormDialog/ReadingForm/StaffFormDialog, Location no exportado en locations.service). **TASK-010 no introduce errores nuevos**. Decisión acordada en plan mode: cerrar TASK-010 con housekeeping pendiente.
+- **`description` del incidente auto-generada (no editable):** decisión del plan mode. Si un cliente quiere editar la descripción en V2, se agrega un campo opcional al modal.
+- **Pendiente para TASK-011 (reportes):** reusar `selectOpenIncidentsByLocation` para métricas de cumplimiento; `buildIncidentDescription` para mostrar la razón del desvío en el PDF; el listado histórico de incidentes ya viene de `listIncidents` con filtros `status`/`locationId`/`equipmentId`/`from`/`to`.
+
+### Pendientes (siguiente tarea lógica)
+**TASK-011** (panel de reportes y exportación PDF, prioridad Media) tiene dependencias satisfechas: TASK-010 ✅, TASK-008 ✅, TASK-009 ✅. Reusará `STALE_THRESHOLD_MS`, `isOutOfRange` y `listIncidents`.
+
+### Siguiente tarea lógica
+**TASK-011** — Panel de reportes con filtros (rango fechas, sede, equipo, tipo, solo con incidentes), tabla de lecturas, gráfico de línea (Recharts), indicador de cumplimiento % dentro de rango, exportación PDF con logo/org/período/tabla/gráfico + snapshot de rangos térmicos. Crea feature `reports/` aislado.
 
 ## Sesión 2026-07-01: cierre TASK-008
 
@@ -191,14 +230,13 @@ depende de TASK-005 (AppShell) y esta ya commiteada.
 
 ## Pendientes
 
-> Las tareas abiertas del backlog están en `files/BACKLOG.md` (TASK-010, TASK-011, TASK-012).
+> Las tareas abiertas del backlog están en `files/BACKLOG.md` (TASK-011, TASK-012).
 > Este archivo es histórico. El "siguiente tarea lógica" se documenta al final de la última sesión.
 
 | ID | Tarea | Prioridad | Módulo | Depende de |
 |----|-------|-----------|--------|------------|
-| TASK-010 | Motor de detección de incidentes + flujo HACCP | Alta | incidents | TASK-009 ✅ |
-| TASK-011 | Panel de reportes con filtros y exportación PDF | Media | reports | TASK-010 |
-| TASK-012 | Panel de platform admin (super admin) | Baja | platform-admin | TASK-005 |
+| TASK-011 | Panel de reportes con filtros y exportación PDF | Media | reports | TASK-010 ✅ |
+| TASK-012 | Panel de platform admin (super admin) | Baja | platform-admin | TASK-005 ✅ |
 
 ---
 

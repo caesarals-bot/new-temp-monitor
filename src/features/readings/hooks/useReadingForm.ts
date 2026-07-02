@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
+import { useIncidentStore } from '@/features/incidents/store/incident.store';
 import { listEquipmentByLocation } from '@/features/equipment/services/equipment.service';
 import { listStaffByLocation } from '@/features/staff/services/staff.service';
+import { isOutOfRange } from '../lib/isOutOfRange';
+import {
+  buildIncidentDescription,
+  createIncidentFromReading,
+} from '@/features/incidents/services/incidents.service';
 import { createReading } from '../services/readings.service';
 import type { CreateReadingFormData } from '../schemas/reading.schema';
 import type { Equipment, Staff } from '@/shared/types/supabase';
@@ -110,21 +116,46 @@ export function useReadingForm(): UseReadingFormReturn {
       setStatus('submitting');
       setServerError(null);
 
-      const equipmentName =
-        equipmentList.find((e) => e.id === data.equipmentId)?.name ?? null;
+      const selectedEquipment =
+        equipmentList.find((e) => e.id === data.equipmentId) ?? null;
+      const equipmentName = selectedEquipment?.name ?? null;
 
-      const { error } = await createReading({
+      if (!selectedEquipment) {
+        setStatus('error');
+        setServerError('Equipo no encontrado');
+        return;
+      }
+
+      const { data: created, error } = await createReading({
         equipmentId: data.equipmentId,
         value: data.value,
         recordedByProfile: profile?.id ?? null,
         recordedByStaff: data.recordedByStaff ?? null,
         takenBy: data.takenBy ?? null,
+        snapshotMin: selectedEquipment.min_temp,
+        snapshotMax: selectedEquipment.max_temp,
       });
 
-      if (error) {
+      if (error || !created) {
         setStatus('error');
-        setServerError(mapError(error.message));
+        setServerError(mapError(error?.message));
         return;
+      }
+
+      if (isOutOfRange(data.value, selectedEquipment.min_temp, selectedEquipment.max_temp)) {
+        const description = buildIncidentDescription({
+          value: data.value,
+          minTemp: selectedEquipment.min_temp,
+          maxTemp: selectedEquipment.max_temp,
+        });
+        await createIncidentFromReading({
+          readingId: created.id,
+          description,
+        });
+        const orgId = useOrganizationStore.getState().organization?.id;
+        if (orgId) {
+          await useIncidentStore.getState().fetchOpenIncidents(orgId);
+        }
       }
 
       setLastReadingValue(data.value);

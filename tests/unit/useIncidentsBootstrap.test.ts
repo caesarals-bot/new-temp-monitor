@@ -26,11 +26,15 @@ vi.mock('@/features/organizations/store/organization.store', () => ({
 }));
 
 const fetchOpenIncidentsMock = vi.fn();
+const subscribeRealtimeMock = vi.fn(() => () => {});
 
 vi.mock('@/features/incidents/store/incident.store', () => ({
   useIncidentStore: Object.assign(
     (selector: (s: Record<string, unknown>) => unknown) =>
-      selector({ fetchOpenIncidents: fetchOpenIncidentsMock }),
+      selector({
+        fetchOpenIncidents: fetchOpenIncidentsMock,
+        subscribeRealtime: subscribeRealtimeMock,
+      }),
     { getState: () => ({}), setState: vi.fn() }
   ),
 }));
@@ -56,9 +60,10 @@ describe('useIncidentsBootstrap', () => {
     expect(fetchOpenIncidentsMock).not.toHaveBeenCalled();
   });
 
-  it('with bypass disabled, calls fetchOpenIncidents with orgId', () => {
+  it('with bypass disabled, calls fetchOpenIncidents and subscribes to realtime', () => {
     mockBypassEnabled = false;
     renderHook(() => useIncidentsBootstrap());
     expect(fetchOpenIncidentsMock).toHaveBeenCalledWith('org-1');
+    expect(subscribeRealtimeMock).toHaveBeenCalledWith('org-1');
   });
 });

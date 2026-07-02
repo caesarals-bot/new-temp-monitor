@@ -7,6 +7,8 @@ export interface CreateReadingInput {
   recordedByProfile: string | null;
   recordedByStaff: string | null;
   takenBy: string | null;
+  snapshotMin: number;
+  snapshotMax: number;
   recordedAt?: string;
 }
 
@@ -114,6 +116,8 @@ export async function createReading(
     equipment_id: input.equipmentId,
     value: input.value,
     reading_type: 'manual',
+    snapshot_min_temp: input.snapshotMin,
+    snapshot_max_temp: input.snapshotMax,
     recorded_by_profile: input.recordedByProfile,
     recorded_by_staff: input.recordedByStaff,
     taken_by: input.takenBy,

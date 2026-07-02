@@ -184,10 +184,6 @@ export function getDevMockIncidents(count: number = 3): Incident[] {
   }));
 }
 
-export function getDevMockOpenIncidentCount(): number {
-  return 3;
-}
-
 const TODAY = new Date('2026-07-01T08:00:00Z');
 const YESTERDAY = new Date('2026-06-30T16:00:00Z');
 const TWO_DAYS_AGO = new Date('2026-06-29T10:00:00Z');

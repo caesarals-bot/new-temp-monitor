@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
+import { useIncidentStore, selectOpenIncidentsByLocation } from '@/features/incidents/store/incident.store';
 import { listEquipmentByLocation } from '@/features/equipment/services/equipment.service';
 import {
   createLocation as createLocationService,
@@ -33,6 +34,7 @@ export interface UseLocationsManagementReturn {
   planType: 'basic' | 'pro' | 'enterprise';
   isMutating: boolean;
   equipmentCountByLocation: Map<string, number>;
+  openIncidentsByLocation: Map<string, number>;
 
   dialog: DialogMode;
   editingLocation: Location | null;
@@ -58,6 +60,7 @@ export function useLocationsManagement(): UseLocationsManagementReturn {
   const setActiveLocation = useOrganizationStore((s) => s.setActiveLocation);
   const fetchLocations = useOrganizationStore((s) => s.fetchLocations);
   const profile = useAuthStore((s) => s.profile);
+  const openIncidentsByLocation = useIncidentStore(selectOpenIncidentsByLocation);
 
   const [dialog, setDialog] = useState<DialogMode>('closed');
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
@@ -213,6 +216,7 @@ export function useLocationsManagement(): UseLocationsManagementReturn {
     planType,
     isMutating,
     equipmentCountByLocation,
+    openIncidentsByLocation,
 
     dialog,
     editingLocation,

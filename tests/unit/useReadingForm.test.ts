@@ -16,7 +16,7 @@ vi.mock('@/features/organizations/store/organization.store', () => ({
         setActiveLocation: vi.fn(),
         fetchLocations: vi.fn().mockResolvedValue(undefined),
       }),
-    { getState: () => ({}) }
+    { getState: () => ({ organization: { id: 'org-1' } }) }
   ),
 }));
 
@@ -43,6 +43,25 @@ vi.mock('@/features/staff/services/staff.service', () => ({
 
 vi.mock('@/features/readings/services/readings.service', () => ({
   createReading: vi.fn(),
+}));
+
+vi.mock('@/features/incidents/store/incident.store', () => ({
+  useIncidentStore: Object.assign(
+    (selector: (s: Record<string, unknown>) => unknown) => selector({}),
+    {
+      getState: () => ({
+        fetchOpenIncidents: vi.fn().mockResolvedValue(undefined),
+      }),
+    }
+  ),
+}));
+
+vi.mock('@/features/incidents/services/incidents.service', () => ({
+  buildIncidentDescription: vi.fn(
+    ({ value, minTemp, maxTemp }: { value: number; minTemp: number; maxTemp: number }) =>
+      `Temperatura de ${value}°C fuera de rango [${minTemp}, ${maxTemp}]`
+  ),
+  createIncidentFromReading: vi.fn().mockResolvedValue({ data: { id: 'inc-new' }, error: null }),
 }));
 
 import { listEquipmentByLocation } from '@/features/equipment/services/equipment.service';
@@ -100,7 +119,20 @@ beforeEach(() => {
     error: null,
   });
   (createReading as ReturnType<typeof vi.fn>).mockResolvedValue({
-    data: null,
+    data: {
+      id: 'r-new',
+      equipment_id: 'eq-1',
+      value: 3.5,
+      reading_type: 'manual',
+      sensor_battery: null,
+      sensor_signal: null,
+      snapshot_min_temp: 0,
+      snapshot_max_temp: 6,
+      recorded_by_profile: 'u-1',
+      recorded_by_staff: null,
+      taken_by: null,
+      recorded_at: '2026-07-01T08:00:00Z',
+    },
     error: null,
   });
 });
@@ -195,6 +227,8 @@ describe('useReadingForm · submit', () => {
       recordedByProfile: 'u-1',
       recordedByStaff: 's-1',
       takenBy: null,
+      snapshotMin: 0,
+      snapshotMax: 6,
     });
     expect(result.current.status).toBe('success');
     expect(result.current.lastReadingValue).toBe(3.5);
@@ -313,8 +347,8 @@ describe('useReadingForm · submit', () => {
   });
 });
 
-describe('useReadingForm · lastReadingEquipmentName lookup', () => {
-  it('stores null when equipmentId does not match any equipment', async () => {
+describe('useReadingForm · equipment resolution', () => {
+  it('returns error when equipmentId does not match any equipment', async () => {
     const { result } = renderHook(() => useReadingForm());
 
     await vi.waitFor(() => {
@@ -330,7 +364,8 @@ describe('useReadingForm · lastReadingEquipmentName lookup', () => {
       });
     });
 
-    expect(result.current.lastReadingEquipmentName).toBeNull();
-    expect(result.current.lastReadingValue).toBe(3.5);
+    expect(result.current.status).toBe('error');
+    expect(result.current.serverError).toBe('Equipo no encontrado');
+    expect(createReading).not.toHaveBeenCalled();
   });
 });

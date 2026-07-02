@@ -39,6 +39,12 @@ export const LazyReadingsHistoryPage = lazy(() =>
   }))
 );
 
+export const LazyIncidentsPage = lazy(() =>
+  import('@/features/incidents/pages/IncidentsPage').then((m) => ({
+    default: m.IncidentsPage,
+  }))
+);
+
 export function RouteFallback() {
   return (
     <div className="flex h-screen items-center justify-center">
