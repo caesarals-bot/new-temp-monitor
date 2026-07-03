@@ -30,9 +30,15 @@ export const useOrganizationStore = create<OrganizationState>((set) => ({
   fetchOrganization: async () => {
     set({ isLoading: true });
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { data: profileData } = await supabase
         .from('profiles')
         .select('organization_id')
+        .eq('id', user.id)
         .single();
 
       if (profileData?.organization_id) {

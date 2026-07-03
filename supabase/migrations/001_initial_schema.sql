@@ -143,11 +143,11 @@ DECLARE
 BEGIN
     SELECT plan_type, max_locations INTO org_plan, org_max_locations
     FROM organizations
-    WHERE id = (SELECT organization_id FROM locations WHERE id = NEW.location_id);
+    WHERE id = NEW.organization_id;
 
     SELECT COUNT(*) INTO current_location_count
     FROM locations
-    WHERE organization_id = (SELECT organization_id FROM locations WHERE id = NEW.location_id);
+    WHERE organization_id = NEW.organization_id;
 
     IF current_location_count >= org_max_locations THEN
         RAISE EXCEPTION 'Has alcanzado el límite de % sede(s) para tu plan %', org_max_locations, org_plan;

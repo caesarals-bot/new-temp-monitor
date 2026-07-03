@@ -1,7 +1,7 @@
 {
   "name": "tempmonitor",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest --run",
+    "db:seed": "node scripts/seed-supabase.mjs",
     "prepare": "husky"
   },
   "dependencies": {
