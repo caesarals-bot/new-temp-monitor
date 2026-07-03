@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { env } from './env';
 
 /**
@@ -14,3 +15,4 @@ import { env } from './env';
  * 2. Copia el output a `src/shared/types/supabase.ts`
  */
 export const supabase = createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_ANON_KEY);
+export type { PostgrestError };

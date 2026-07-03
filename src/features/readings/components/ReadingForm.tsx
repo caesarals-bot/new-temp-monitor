@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm, Controller, type UseFormReturn } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createReadingSchema, type CreateReadingFormData } from '../schemas/reading.schema';
 import { EquipmentSelector } from './EquipmentSelector';
@@ -35,8 +35,9 @@ export function ReadingForm({
   onCancel,
   initialStaffMode = 'profile',
 }: ReadingFormProps) {
-  const form: UseFormReturn<FormShape> = useForm<FormShape>({
-    resolver: zodResolver(createReadingSchema),
+  const form = useForm<FormShape>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(createReadingSchema) as any,
     defaultValues: {
       equipmentId: '',
       value: '' as unknown as number,
@@ -134,7 +135,7 @@ export function ReadingForm({
         name="value"
         render={({ field }) => (
           <TemperatureInput
-            value={field.value === '' || field.value === undefined ? '' : (field.value as number)}
+            value={typeof field.value !== 'number' ? '' : field.value}
             onChange={(v) => field.onChange(v)}
             minTemp={selectedEquipment?.min_temp}
             maxTemp={selectedEquipment?.max_temp}
@@ -147,9 +148,8 @@ export function ReadingForm({
       {showOutOfRangeWarning && selectedEquipment && (
         <Alert>
           <AlertDescription>
-            La temperatura está fuera del rango aceptable del equipo (
-            {selectedEquipment.min_temp}°C a {selectedEquipment.max_temp}°C). La
-            lectura se registrará igualmente.
+            La temperatura está fuera del rango aceptable del equipo ({selectedEquipment.min_temp}°C
+            a {selectedEquipment.max_temp}°C). La lectura se registrará igualmente.
           </AlertDescription>
         </Alert>
       )}
@@ -175,12 +175,7 @@ export function ReadingForm({
       <input type="hidden" {...register('takenBy')} />
 
       <div className="flex items-center justify-end gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancelar
         </Button>
         <Button type="submit" disabled={isSubmitting}>

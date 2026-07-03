@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase';
-import type { PostgrestError, Staff } from '@/shared/types/supabase';
+import type { PostgrestError } from '@/shared/lib/supabase';
+import type { Staff } from '@/shared/types/supabase';
 
 export interface CreateStaffInput {
   locationId: string;
@@ -27,11 +28,7 @@ export async function listStaffByLocation(
 export async function getStaff(
   staffId: string
 ): Promise<{ data: Staff | null; error: PostgrestError | null }> {
-  const { data, error } = await supabase
-    .from('staff')
-    .select('*')
-    .eq('id', staffId)
-    .single();
+  const { data, error } = await supabase.from('staff').select('*').eq('id', staffId).single();
 
   return { data, error };
 }

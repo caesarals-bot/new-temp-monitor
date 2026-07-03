@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase';
-import type { PostgrestError, TemperatureReading } from '@/shared/types/supabase';
+import type { PostgrestError } from '@/shared/lib/supabase';
+import type { TemperatureReading } from '@/shared/types/supabase';
 
 export interface CreateReadingInput {
   equipmentId: string;
@@ -33,10 +34,7 @@ export async function listReadingsByEquipment(
 export async function listReadingsByLocation(
   locationId: string
 ): Promise<{ data: TemperatureReading[] | null; error: PostgrestError | null }> {
-  const equipmentRes = await supabase
-    .from('equipment')
-    .select('id')
-    .eq('location_id', locationId);
+  const equipmentRes = await supabase.from('equipment').select('id').eq('location_id', locationId);
 
   if (equipmentRes.error) {
     return { data: null, error: equipmentRes.error };
@@ -74,10 +72,7 @@ export async function latestReadingByEquipment(
 export async function countReadingsByLocation(
   locationId: string
 ): Promise<{ count: number | null; error: PostgrestError | null }> {
-  const equipmentRes = await supabase
-    .from('equipment')
-    .select('id')
-    .eq('location_id', locationId);
+  const equipmentRes = await supabase.from('equipment').select('id').eq('location_id', locationId);
 
   if (equipmentRes.error) {
     return { count: null, error: equipmentRes.error };
@@ -124,11 +119,7 @@ export async function createReading(
   };
   if (input.recordedAt) row.recorded_at = input.recordedAt;
 
-  const { data, error } = await supabase
-    .from('temperature_readings')
-    .insert(row)
-    .select()
-    .single();
+  const { data, error } = await supabase.from('temperature_readings').insert(row).select().single();
 
   return { data, error };
 }

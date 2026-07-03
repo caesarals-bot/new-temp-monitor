@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase';
-import type { Equipment, PostgrestError } from '@/shared/types/supabase';
+import type { PostgrestError } from '@/shared/lib/supabase';
+import type { Equipment } from '@/shared/types/supabase';
 
 export interface CreateEquipmentInput {
   locationId: string;
@@ -85,10 +86,7 @@ export async function updateEquipment(
 export async function deleteEquipment(
   equipmentId: string
 ): Promise<{ data: null; error: PostgrestError | null }> {
-  const { error } = await supabase
-    .from('equipment')
-    .delete()
-    .eq('id', equipmentId);
+  const { error } = await supabase.from('equipment').delete().eq('id', equipmentId);
 
   return { data: null, error };
 }

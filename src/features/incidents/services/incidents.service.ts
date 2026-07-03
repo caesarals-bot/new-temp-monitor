@@ -11,17 +11,10 @@
  *   incidents por `equipment_id IN (...)`). Evitamos `!inner` join anidado.
  */
 import { supabase } from '@/shared/lib/supabase';
+import type { PostgrestError } from '@/shared/lib/supabase';
 import { listEquipmentByLocation } from '@/features/equipment/services/equipment.service';
 import { outOfRangeDirection } from '@/features/readings/lib/isOutOfRange';
-import type {
-  CreateIncidentInput,
-  IncidentFilters,
-  IncidentWithReading,
-} from '../types';
-
-// Tipo local mientras @/shared/types/supabase no exporta PostgrestError
-// (pendiente housekeeping pre-existente). Sigue la forma de Supabase JS.
-type PostgrestError = { message: string; details?: string; hint?: string; code?: string };
+import type { CreateIncidentInput, IncidentFilters, IncidentWithReading } from '../types';
 
 export interface ListIncidentsParams {
   organizationId: string;

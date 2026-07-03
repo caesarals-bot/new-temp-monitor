@@ -3,164 +3,58 @@
 > Estado: **PROPUESTA** — pendiente de aprobación de César antes de ejecutar cualquier tarea.
 > Solo se trabaja una tarea a la vez en estado APROBADA.
 >
-> **Tareas cerradas:** ver `files/TASKS_HISTORY.md` (TASK-001 a TASK-009).
+> **Tareas cerradas:** ver `files/TASKS_HISTORY.md` (TASK-001 a TASK-013).
 > **Bitácora de ejecución:** ver `files/CHANGELOG.md` (sesiones, decisiones, housekeeping).
 
 ---
 
-## TASK-010 — Motor de incidentes y flujo HACCP
+## TASK-014 — Estabilización: Políticas RLS para Platform Admin en BD
 
-**Módulo:** incidents  
+**Módulo:** shared  
 **Prioridad:** Alta  
-**Depende de:** TASK-009 ✅  
-**Estimación:** L (5–6h)
+**Depende de:** TASK-013  
+**Estimación:** S (1h)
 
 ### Descripción
 
-Los incidentes son el corazón regulatorio del sistema. Cuando una lectura está fuera de rango, se crea un incidente que debe ser resuelto con acción correctiva documentada (requisito HACCP/ISP). Un incidente no puede cerrarse sin `action_taken`, `resolved_by` y `resolved_at`.
+Crear y aplicar una migración SQL en Supabase que defina las políticas RLS necesarias para que el rol platform admin tenga acceso cross-tenant de forma segura en producción.
 
 ### Criterios de aceptación
 
-- [ ] Lista de incidentes (abiertos primero, luego resueltos)
-- [ ] Cada incidente muestra: equipo, lectura que lo gatilló, temperatura registrada, rango esperado, tiempo transcurrido
-- [ ] Modal de resolución: campo `action_taken` (obligatorio, mínimo 20 caracteres), botón "Cerrar incidente"
-- [ ] Al resolver: UPDATE en `incidents` con `status: 'resolved'`, `resolved_by`, `resolved_at`
-- [ ] Solo `owner`, `admin` o `manager` pueden resolver incidentes
-- [ ] `staff` ve los incidentes pero no puede resolverlos (UI deshabilitada con explicación)
-- [ ] `useIncidentStore` expone `openIncidents` y `hasOpenIncidents` para el badge en sidebar
-- [ ] Filtros: todos / abiertos / resueltos, por sede, por equipo, por rango de fecha
-- [ ] `openIncidents` en el store se actualiza en tiempo real (Supabase Realtime, suscripción inicializada una sola vez)
-- [ ] **Cablear `snapshot_min_temp`/`snapshot_max_temp`** al insertar readings out-of-range (pendiente heredado de TASK-008)
-- [ ] **Cablear `outIncidentCount` real en `LocationCard`** (placeholder 0 pendiente desde TASK-006)
-- [ ] Reemplazar mock data de `useIncidentsBootstrap` por channel real de `incidents`
+- [ ] Crear el archivo de migración `supabase/migrations/002_platform_admin_policies.sql`.
+- [ ] Crear la función helper `is_platform_admin()` como `SECURITY DEFINER STABLE` para validar el rol del usuario autenticado.
+- [ ] Definir políticas RLS de SELECT/UPDATE en la tabla `organizations` y SELECT en `locations`, `profiles` y `equipment` basadas en el rol platform admin.
+- [ ] Crear una política restrictiva o vista para `incidents` (counts sin descripción/detalles) y asegurar que no hay política de acceso para `temperature_readings` (el platform admin no debe ver temperaturas).
+- [ ] Aplicar localmente la migración y comprobar que no rompe los tests existentes ni el aislamiento de tenants normales.
 
-### Pendientes heredados que se cierran
+### Archivos afectados
 
-- Reemplazar `getDevMockOpenIncidentCount` por datos reales del store
-- Crear feature `incidents` aislado (no se importa de `readings` directamente, comunicación via store o service)
-- Reusar `isOutOfRange` de `features/readings/lib/` (ADR compartido)
-
-### Archivos producidos
-
-```
-src/features/incidents/
-├── components/
-│   ├── IncidentList.tsx
-│   ├── IncidentCard.tsx
-│   ├── IncidentResolutionModal.tsx
-│   └── IncidentFilters.tsx
-├── store/
-│   └── incident.store.ts
-├── hooks/
-│   ├── useIncidents.ts
-│   └── useRealtimeIncidents.ts
-├── services/
-│   └── incidents.service.ts
-├── schemas/
-│   └── incident.schema.ts
-└── types.ts
-```
-
-### Tests requeridos
-
-- Schema: `action_taken` requiere mínimo 20 caracteres
-- `incidents.service.ts`: resolveIncident setea los tres campos requeridos
-- `useIncidents`: filtering correcto por estado
-- `incident.store`: selectores granulares no re-renderizan ante cambios no observados
-- `useRealtimeIncidents`: cleanup de channel (mismo patrón que `useRealtimeReadings`, ADR-010)
+- `supabase/migrations/002_platform_admin_policies.sql`
 
 ---
 
-## TASK-011 — Panel de reportes y exportación PDF
+## TASK-015 — Estabilización: Seed de Base de Datos y Smoke Tests E2E
 
-**Módulo:** reports  
-**Prioridad:** Media  
-**Depende de:** TASK-010 ✅  
-**Estimación:** L (6–8h)
-
-### Descripción
-
-Los reportes son el entregable que los clientes muestran a los inspectores sanitarios. Deben ser claros, filtrables y exportables en PDF.
-
-### Criterios de aceptación
-
-- [ ] Filtros: rango de fechas, sede, equipo, tipo de lectura (manual/IoT preparado), solo con incidentes
-- [ ] Tabla de lecturas con columnas: fecha/hora, equipo, temperatura, rango configurado, estado, quién registró
-- [ ] Gráfico de línea de temperatura por equipo en el período seleccionado (Recharts)
-- [ ] Indicador de cumplimiento: % de lecturas dentro del rango en el período
-- [ ] Exportación PDF: genera un reporte con logo, nombre de organización, período, tabla y gráfico
-- [ ] PDF incluye snapshot de rangos térmicos (desde `snapshot_min_temp/max_temp`) — no los actuales
-- [ ] Paginación en la tabla (50 registros por página)
-- [ ] Resumen de incidentes del período: cuántos, cuáles fueron resueltos, cuáles siguen abiertos
-
-### Pendientes heredados que se cierran
-
-- Reusar `STALE_THRESHOLD_MS` de `features/readings/lib/timeSince.ts` (ADR-008)
-- Reusar `isOutOfRange` de `features/readings/lib/isOutOfRange.ts` para cálculo de cumplimiento
-
-### Archivos producidos
-
-```
-src/features/reports/
-├── components/
-│   ├── ReportsDashboard.tsx
-│   ├── ReportFilters.tsx
-│   ├── ReadingsTable.tsx
-│   ├── TemperatureChart.tsx
-│   ├── ComplianceSummary.tsx
-│   └── PdfExportButton.tsx
-├── hooks/
-│   └── useReport.ts
-└── services/
-    └── reports.service.ts
-```
-
-### Tests requeridos
-
-- `reports.service.ts`: filtros producen la query correcta
-- `useReport`: paginación y cálculo de cumplimiento
-
----
-
-## TASK-012 — Panel de platform admin
-
-**Módulo:** platform-admin  
-**Prioridad:** Baja  
-**Depende de:** TASK-005 ✅  
-**Estimación:** M (3–4h)
+**Módulo:** shared  
+**Prioridad:** Alta  
+**Depende de:** TASK-014  
+**Estimación:** M (2.5h)
 
 ### Descripción
 
-Vista exclusiva para usuarios con `is_platform_admin: true`. Permite ver todas las organizaciones del SaaS, su estado y métricas básicas.
+Desarrollar un script de carga de datos iniciales y ejecutar una prueba de humo manual end-to-end con una instancia real de Supabase para taggear la release estable `v1.0.0`.
 
 ### Criterios de aceptación
 
-- [ ] Acceso protegido: solo `is_platform_admin === true` puede ver estas rutas
-- [ ] Lista de organizaciones: nombre, tipo, plan, estado (active/paused/suspended), fecha de registro
-- [ ] Cambiar estado de organización: active ↔ paused ↔ suspended
-- [ ] Ver detalles de una organización: sedes, usuarios, volumen de lecturas
-- [ ] Métricas globales: total organizaciones activas, total lecturas en los últimos 7 días, total incidentes abiertos
-- [ ] El platform admin NO puede ver los datos de temperatura de ninguna organización (solo metadatos)
+- [ ] Crear `scripts/seed-supabase.mjs` idempotente para poblar la base de datos (2 organizaciones, 2 dueños, 6 equipos, 20 lecturas de temperatura, 4 incidentes de desvío).
+- [ ] Aplicar todas las migraciones (000, 001, 002) en un proyecto real de Supabase y correr el script de seed.
+- [ ] Probar el inicio de sesión y el flujo completo en la PWA (dashboard en tiempo real, registro de lecturas fuera de rango, resolución de incidentes con justificación HACCP, generación y descarga de reporte PDF, panel global del platform admin).
+- [ ] Realizar el bump de versión a `1.0.0` y crear el tag de Git `v1.0.0`.
 
-### Archivos producidos
+### Archivos afectados
 
-```
-src/features/platform-admin/
-├── components/
-│   ├── PlatformDashboard.tsx
-│   ├── OrganizationList.tsx
-│   ├── OrganizationDetail.tsx
-│   └── GlobalMetrics.tsx
-├── hooks/
-│   └── usePlatformAdmin.ts
-└── services/
-    └── platform-admin.service.ts
-```
-
-### Tests requeridos
-
-- Ruta protegida redirige si `is_platform_admin === false`
-- `platform-admin.service.ts`: getOrganizations con filtros
+- [NEW] `scripts/seed-supabase.mjs`
+- `package.json`
 
 ---
 
@@ -175,16 +69,20 @@ src/features/platform-admin/
 **Estimación:** S / M / L (Small ≤ 2h, Medium ≤ 4h, Large ≤ 8h)
 
 ### Descripción
+
 Qué se construye y por qué.
 
 ### Criterios de aceptación
+
 - [ ] Criterio verificable 1
 - [ ] Criterio verificable 2
 
 ### Archivos afectados
+
 - src/features/xxx/...
 
 ### Tests requeridos
+
 - Qué se debe testear en esta tarea
 ```
 

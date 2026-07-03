@@ -11,15 +11,12 @@
  *   son punto de integración entre features).
  */
 import { supabase } from '@/shared/lib/supabase';
+import type { PostgrestError } from '@/shared/lib/supabase';
 import { listEquipmentByLocation } from '@/features/equipment/services/equipment.service';
 import { listIncidents } from '@/features/incidents/services/incidents.service';
 import type { TemperatureReading } from '@/shared/types/supabase';
 import type { IncidentWithReading, IncidentFilters } from '@/features/incidents/types';
 import type { ReportFilters, ReadingTypeFilter } from '../types';
-
-// Tipo local mientras @/shared/types/supabase no exporta PostgrestError
-// (pendiente housekeeping pre-existente, sigue el workaround de TASK-010).
-type PostgrestError = { message: string; details?: string; hint?: string; code?: string };
 
 export interface ListReadingsReportParams {
   organizationId: string;

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { isDevBypassEnabled } from '@/shared/lib/dev-bypass';
 import { supabase } from '@/shared/lib/supabase';
-import type { PostgrestError, TemperatureReading } from '@/shared/types/supabase';
+import type { PostgrestError } from '@/shared/lib/supabase';
+import type { TemperatureReading } from '@/shared/types/supabase';
 
 interface UseRealtimeReadingsParams {
   locationId: string | null;
@@ -49,6 +50,7 @@ export function useRealtimeReadings({
 
   useEffect(() => {
     if (!enabled || !locationId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLatestByEquipment(new Map());
       setIsSubscribed(false);
       setError(null);

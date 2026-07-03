@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm, type UseFormReturn } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createLocationSchema,
@@ -48,8 +48,9 @@ export function LocationFormDialog({
 }: LocationFormDialogProps) {
   const isEdit = mode === 'edit';
 
-  const form: UseFormReturn<FormValues> = useForm<FormValues>({
-    resolver: zodResolver(isEdit ? updateLocationSchema : createLocationSchema),
+  const form = useForm<FormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(isEdit ? updateLocationSchema : createLocationSchema) as any,
     defaultValues: {
       name: '',
       address: '',
@@ -93,7 +94,10 @@ export function LocationFormDialog({
     await onSubmitCreate(createData);
   });
 
-  const { register, formState: { errors } } = form;
+  const {
+    register,
+    formState: { errors },
+  } = form;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -118,9 +122,7 @@ export function LocationFormDialog({
               aria-invalid={errors.name ? 'true' : 'false'}
               {...register('name')}
             />
-            {errors.name && (
-              <p className="text-xs text-[--color-danger]">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="text-xs text-[--color-danger]">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -136,7 +138,12 @@ export function LocationFormDialog({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>

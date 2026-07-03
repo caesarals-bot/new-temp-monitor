@@ -1,5 +1,8 @@
 import { supabase } from '@/shared/lib/supabase';
-import type { Location, PostgrestError } from '@/shared/types/supabase';
+import type { PostgrestError } from '@/shared/lib/supabase';
+import type { Location } from '@/shared/types/supabase';
+
+export type { Location };
 
 export interface CreateLocationInput {
   organizationId: string;
@@ -79,10 +82,7 @@ export async function updateLocation(
 export async function deleteLocation(
   locationId: string
 ): Promise<{ data: null; error: PostgrestError | null }> {
-  const { error } = await supabase
-    .from('locations')
-    .delete()
-    .eq('id', locationId);
+  const { error } = await supabase.from('locations').delete().eq('id', locationId);
 
   return { data: null, error };
 }
@@ -121,7 +121,10 @@ export async function countLocationDependencies(
       : supabase
           .from('temperature_readings')
           .select('id', { count: 'exact', head: true })
-          .in('equipment_id', equipmentIds.map((e) => e.id)),
+          .in(
+            'equipment_id',
+            equipmentIds.map((e) => e.id)
+          ),
   ]);
 
   if (staff.error) return { data: null, error: staff.error };

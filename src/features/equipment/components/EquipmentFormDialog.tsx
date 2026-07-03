@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm, type UseFormReturn } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createEquipmentSchema,
@@ -62,7 +62,7 @@ export function EquipmentFormDialog({
 }: EquipmentFormDialogProps) {
   const isEdit = mode === 'edit';
 
-  const form: UseFormReturn<FormValues> = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(isEdit ? updateEquipmentSchema : createEquipmentSchema) as never,
     defaultValues: EMPTY,
   });
@@ -113,7 +113,10 @@ export function EquipmentFormDialog({
     await onSubmitCreate(createData);
   });
 
-  const { register, formState: { errors } } = form;
+  const {
+    register,
+    formState: { errors },
+  } = form;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -138,9 +141,7 @@ export function EquipmentFormDialog({
               aria-invalid={errors.name ? 'true' : 'false'}
               {...register('name')}
             />
-            {errors.name && (
-              <p className="text-xs text-[--color-danger]">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="text-xs text-[--color-danger]">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -154,11 +155,7 @@ export function EquipmentFormDialog({
 
           <div className="space-y-2">
             <Label htmlFor="equipment-code">Código (opcional)</Label>
-            <Input
-              id="equipment-code"
-              placeholder="EQ-CC-001"
-              {...register('code')}
-            />
+            <Input id="equipment-code" placeholder="EQ-CC-001" {...register('code')} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -191,7 +188,12 @@ export function EquipmentFormDialog({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>

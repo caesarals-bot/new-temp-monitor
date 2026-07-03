@@ -577,3 +577,196 @@ src/features/readings/
 - `EquipmentStatusGrid`: empty state cuando no hay equipos
 - `LastReadingBadge`: estados fresh/stale/no-reading
 - `ReadingsHistoryPage`: composición pura
+
+---
+
+## TASK-010 — Motor de incidentes y flujo HACCP
+
+**Módulo:** incidents  
+**Prioridad:** Alta  
+**Depende de:** TASK-009 ✅  
+**Estimación:** L (5–6h)  
+**Estado:** ✅ Completada 2026-07-02
+
+### Descripción
+
+Los incidentes son el corazón regulatorio del sistema. Cuando una lectura está fuera de rango, se crea un incidente que debe ser resuelto con acción correctiva documentada (requisito HACCP/ISP). Un incidente no puede cerrarse sin `action_taken`, `resolved_by` y `resolved_at`.
+
+### Criterios de aceptación
+
+- [x] Lista de incidentes (abiertos primero, luego resueltos)
+- [x] Cada incidente muestra: equipo, lectura que lo gatilló, temperatura registrada, rango esperado, tiempo transcurrido
+- [x] Modal de resolución: campo `action_taken` (obligatorio, mínimo 20 caracteres), botón "Cerrar incidente"
+- [x] Al resolver: UPDATE en `incidents` con `status: 'resolved'`, `resolved_by`, `resolved_at`
+- [x] Solo `owner`, `admin` o `manager` pueden resolver incidentes
+- [x] `staff` ve los incidentes pero no puede resolverlos (UI deshabilitada con explicación)
+- [x] `useIncidentStore` expone `openIncidents` y `hasOpenIncidents` para el badge en sidebar
+- [x] Filtros: todos / abiertos / resueltos, por sede, por equipo, por rango de fecha
+- [x] `openIncidents` en el store se actualiza en tiempo real (Supabase Realtime, suscripción inicializada una sola vez)
+- [x] **Cablear `snapshot_min_temp`/`snapshot_max_temp`** al insertar readings out-of-range (pendiente heredado de TASK-008)
+- [x] **Cablear `outIncidentCount` real en `LocationCard`** (placeholder 0 pendiente desde TASK-006)
+- [x] Reemplazar mock data de `useIncidentsBootstrap` por channel real de `incidents`
+
+### Pendientes heredados que se cierran
+
+- [x] Reemplazar `getDevMockOpenIncidentCount` por datos reales del store
+- [x] Crear feature `incidents` aislado (no se importa de `readings` directamente, comunicación via store o service)
+- [x] Reusar `isOutOfRange` de `features/readings/lib/` (ADR compartido)
+
+### Archivos producidos
+
+```
+src/features/incidents/
+├── components/
+│   ├── IncidentList.tsx
+│   ├── IncidentCard.tsx
+│   ├── IncidentResolutionModal.tsx
+│   └── IncidentFilters.tsx
+├── store/
+│   └── incident.store.ts
+├── hooks/
+│   ├── useIncidents.ts
+│   └── useRealtimeIncidents.ts
+├── services/
+│   └── incidents.service.ts
+├── schemas/
+│   └── incident.schema.ts
+└── types.ts
+```
+
+### Tests requeridos
+
+- Schema: `action_taken` requiere mínimo 20 caracteres
+- `incidents.service.ts`: resolveIncident setea los tres campos requeridos
+- `useIncidents`: filtering correcto por estado
+- `incident.store`: selectores granulares no re-renderizan ante cambios no observados
+- `useRealtimeIncidents`: cleanup de channel (mismo patrón que `useRealtimeReadings`, ADR-010)
+
+---
+
+## TASK-011 — Panel de reportes y exportación PDF
+
+**Módulo:** reports  
+**Prioridad:** Media  
+**Depende de:** TASK-010 ✅  
+**Estimación:** L (6–8h)  
+**Estado:** ✅ Completada 2026-07-02
+
+### Descripción
+
+Los reportes son el entregable que los clientes muestran a los inspectores sanitarios. Deben ser claros, filtrables y exportables en PDF.
+
+### Criterios de aceptación
+
+- [x] Filtros: rango de fechas, sede, equipo, tipo de lectura (manual/IoT preparado), solo con incidentes
+- [x] Tabla de lecturas con columnas: fecha/hora, equipo, temperatura, rango configurado, estado, quién registró
+- [x] Gráfico de línea de temperatura por equipo en el período seleccionado (Recharts)
+- [x] Indicador de cumplimiento: % de lecturas dentro del rango en el período
+- [x] Exportación PDF: genera un reporte con logo, nombre de organización, período, tabla y gráfico
+- [x] PDF incluye snapshot de rangos térmicos (desde `snapshot_min_temp/max_temp`) — no los actuales
+- [x] Paginación en la tabla (50 registros por página)
+- [x] Resumen de incidentes del período: cuántos, cuáles fueron resueltos, cuáles siguen abiertos
+
+### Pendientes heredados que se cierran
+
+- [x] Reusar `STALE_THRESHOLD_MS` de `features/readings/lib/timeSince.ts` (ADR-008)
+- [x] Reusar `isOutOfRange` de `features/readings/lib/isOutOfRange.ts` para cálculo de cumplimiento
+
+### Archivos producidos
+
+```
+src/features/reports/
+├── components/
+│   ├── ReportsDashboard.tsx
+│   ├── ReportFilters.tsx
+│   ├── ReadingsTable.tsx
+│   ├── TemperatureChart.tsx
+│   ├── ComplianceSummary.tsx
+│   └── PdfExportButton.tsx
+├── hooks/
+│   └── useReport.ts
+└── services/
+    └── reports.service.ts
+```
+
+### Tests requeridos
+
+- `reports.service.ts`: filtros producen la query correcta
+- `useReport`: paginación y cálculo de cumplimiento
+
+---
+
+## TASK-012 — Panel de platform admin
+
+**Módulo:** platform-admin  
+**Prioridad:** Baja  
+**Depende de:** TASK-005 ✅  
+**Estimación:** M (3–4h)  
+**Estado:** ✅ Completada 2026-07-02
+
+### Descripción
+
+Vista exclusiva para usuarios con `is_platform_admin: true`. Permite ver todas las organizaciones del SaaS, su estado y métricas básicas.
+
+### Criterios de aceptación
+
+- [x] Acceso protegido: solo `is_platform_admin === true` puede ver estas rutas
+- [x] Lista de organizaciones: nombre, tipo, plan, estado (active/paused/suspended), fecha de registro
+- [x] Cambiar estado de organización: active ↔ paused ↔ suspended
+- [x] Ver detalles de una organización: sedes, usuarios, volumen de lecturas
+- [x] Métricas globales: total organizaciones activas, total lecturas en los últimos 7 días, total incidentes abiertos
+- [x] El platform admin NO puede ver los datos de temperatura de ninguna organización (solo metadatos)
+
+### Archivos producidos
+
+```
+src/features/platform-admin/
+├── components/
+│   ├── PlatformDashboard.tsx
+│   ├── OrganizationList.tsx
+│   ├── OrganizationDetail.tsx
+│   └── GlobalMetrics.tsx
+├── hooks/
+│   └── usePlatformAdmin.ts
+└── services/
+    └── platform-admin.service.ts
+```
+
+### Tests requeridos
+
+- Ruta protegida redirige si `is_platform_admin === false`
+- `platform-admin.service.ts`: getOrganizations con filtros
+
+---
+
+## TASK-013 — Estabilización: Limpieza de compilación TypeScript (`tsc`)
+
+**Módulo:** shared  
+**Prioridad:** Alta  
+**Depende de:** TASK-012 ✅  
+**Estimación:** S (1.5h)  
+**Estado:** ✅ Completada 2026-07-03
+
+### Descripción
+
+Corregir todos los errores de tipado y compilación preexistentes en el repositorio para lograr un build limpio de producción (`pnpm build`).
+
+### Criterios de aceptación
+
+- [x] Exportar `PostgrestError` desde `supabase.ts` y quitar los stubs de importación locales en los servicios de `incidents`, `reports` y `platform-admin`.
+- [x] Tipar correctamente los generics de React Hook Form en los componentes de diálogo (`LocationFormDialog.tsx`, `EquipmentFormDialog.tsx`, `ReadingForm.tsx`, `StaffFormDialog.tsx`).
+- [x] Corregir la comparación de tipo `number === string` en `ReadingForm.tsx:137`.
+- [x] Exportar la interfaz/tipo `Location` en `locations.service.ts`.
+- [x] Asegurar que `pnpm build` compile limpiamente sin warnings ni errores de TypeScript.
+- [x] Verificar que los 619 tests sigan pasando sin errores.
+
+### Archivos afectados
+
+- `src/shared/lib/supabase.ts`
+- `src/features/incidents/services/incidents.service.ts`
+- `src/features/reports/services/reports.service.ts`
+- `src/features/platform-admin/services/platform-admin.service.ts`
+- `src/features/locations/components/LocationFormDialog.tsx`
+- `src/features/equipment/components/EquipmentFormDialog.tsx`
+- `src/features/readings/components/ReadingForm.tsx`
+- `src/features/staff/components/StaffFormDialog.tsx`

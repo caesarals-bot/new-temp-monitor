@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm, type UseFormReturn } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createStaffSchema,
@@ -48,8 +48,9 @@ export function StaffFormDialog({
 }: StaffFormDialogProps) {
   const isEdit = mode === 'edit';
 
-  const form: UseFormReturn<FormValues> = useForm<FormValues>({
-    resolver: zodResolver(isEdit ? updateStaffSchema : createStaffSchema),
+  const form = useForm<FormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(isEdit ? updateStaffSchema : createStaffSchema) as any,
     defaultValues: {
       name: '',
       role: '',
@@ -85,7 +86,10 @@ export function StaffFormDialog({
     await onSubmitCreate({ name: data.name, role: data.role });
   });
 
-  const { register, formState: { errors } } = form;
+  const {
+    register,
+    formState: { errors },
+  } = form;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -110,9 +114,7 @@ export function StaffFormDialog({
               aria-invalid={errors.name ? 'true' : 'false'}
               {...register('name')}
             />
-            {errors.name && (
-              <p className="text-xs text-[--color-danger]">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="text-xs text-[--color-danger]">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -123,13 +125,16 @@ export function StaffFormDialog({
               aria-invalid={errors.role ? 'true' : 'false'}
               {...register('role')}
             />
-            {errors.role && (
-              <p className="text-xs text-[--color-danger]">{errors.role.message}</p>
-            )}
+            {errors.role && <p className="text-xs text-[--color-danger]">{errors.role.message}</p>}
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>

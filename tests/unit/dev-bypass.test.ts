@@ -51,6 +51,7 @@ describe('dev-bypass', () => {
 
   it('getDevMockProfile returns owner role and organization_id', async () => {
     import.meta.env.VITE_DEV_BYPASS_AUTH = 'true';
+    import.meta.env.VITE_DEV_BYPASS_PLATFORM_ADMIN = 'false';
     const { getDevMockProfile } = await import('@/shared/lib/dev-bypass');
     const profile = getDevMockProfile();
     expect(profile.role).toBe('owner');
