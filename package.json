@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest --run",
+    "db:seed": "node scripts/seed-supabase.mjs",
     "prepare": "husky"
   },
   "dependencies": {
