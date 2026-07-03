@@ -177,8 +177,8 @@ describe('platform-admin.service · getOrganizationDetail', () => {
           ],
           null
         );
-      if (table === 'temperature_readings') return makeChain(calls5, null, null);
-      if (table === 'incidents')
+      if (table === 'temperature_readings_summary') return makeChain(calls5, null, null);
+      if (table === 'incidents_summary')
         return makeChain(
           calls6,
           [
@@ -254,8 +254,9 @@ describe('platform-admin.service · getGlobalMetrics', () => {
           ],
           null
         );
-      if (table === 'temperature_readings') return makeChain(calls2, null, null);
-      if (table === 'incidents') return makeChain(calls3, [{ id: 'i-1' }, { id: 'i-2' }], null);
+      if (table === 'temperature_readings_summary') return makeChain(calls2, null, null);
+      if (table === 'incidents_summary')
+        return makeChain(calls3, [{ id: 'i-1' }, { id: 'i-2' }], null);
       return makeChain({});
     });
 

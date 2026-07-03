@@ -12,12 +12,9 @@
  * Patrón: funciones puras `{ data, error }`. Sin tocar stores. Sin logging.
  */
 import { supabase } from '@/shared/lib/supabase';
+import type { PostgrestError } from '@/shared/lib/supabase';
 import { isDevBypassEnabled } from '@/shared/lib/dev-bypass';
 import type { Organization } from '@/shared/types/supabase';
-
-// Tipo local mientras @/shared/types/supabase no exporta PostgrestError
-// (mismo workaround que TASK-010/011).
-type PostgrestError = { message: string; details?: string; hint?: string; code?: string };
 
 export interface OrganizationListItem {
   id: string;
@@ -200,7 +197,11 @@ export async function getOrganizationDetail(
         full_name: string | null;
         role: string;
       }[],
-      counts: countsRes.data!,
+      counts: {
+        ...countsRes.data!,
+        locations: locationsRes.data?.length ?? 0,
+        profiles: profilesRes.data?.length ?? 0,
+      },
     },
     error: null,
   };
@@ -223,15 +224,10 @@ async function getOrganizationCounts(organizationId: string): Promise<{
     equipmentIds.length === 0
       ? Promise.resolve({ count: 0, error: null })
       : supabase
-          .from('temperature_readings')
+          .from('temperature_readings_summary')
           .select('id', { count: 'exact', head: true })
           .in('equipment_id', equipmentIds),
-    supabase
-      .from('incidents')
-      .select(
-        'id, status, reading:temperature_readings!inner(equipment_id, equipment:equipment!inner(location_id, locations!inner(organization_id)))'
-      )
-      .eq('reading.equipment.locations.organization_id', organizationId),
+    supabase.from('incidents_summary').select('id, status').eq('organization_id', organizationId),
   ]);
 
   if ('error' in readingsRes && readingsRes.error) {
@@ -307,10 +303,10 @@ export async function getGlobalMetrics(): Promise<{
   const [orgsRes, readingsRes, incidentsRes] = await Promise.all([
     supabase.from('organizations').select('id, status'),
     supabase
-      .from('temperature_readings')
+      .from('temperature_readings_summary')
       .select('id', { count: 'exact', head: true })
       .gte('recorded_at', sevenDaysAgo.toISOString()),
-    supabase.from('incidents').select('id, status').eq('status', 'open'),
+    supabase.from('incidents_summary').select('id, status').eq('status', 'open'),
   ]);
 
   if (orgsRes.error) return { data: null, error: orgsRes.error };
