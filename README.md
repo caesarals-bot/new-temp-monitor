@@ -120,9 +120,18 @@ Detalles completos en [`files/AGENT.md`](./files/AGENT.md).
 
 ## Estado del proyecto
 
-**Última tarea cerrada:** HOTFIX-001 — Resolución de carga vacía de Sedes, Personal y Equipos
-**Tests:** 452 pasando  
-**Próxima tarea:** TASK-009 — Dashboard de lecturas con estado en tiempo real
+**Última tarea cerrada:** HOTFIX-002 — Platform admin: acceso al panel y datos reales
+**Tests:** 75 tests de lógica pura pasando (los tests de hooks/componentes requieren fix de tooling, ver CHANGELOG)
+**Build:** ✅ `pnpm build` limpio
+**Deploy:** ✅ Vercel (rama `main` → `git-main`) — se actualiza con cada push a origin
+
+**Módulo admin funcional:**
+
+- `/admin/organizations` — lista cross-tenant con filtros (estado/plan/rubro), **cambiar estado** y **cambiar plan** (plan_type + max_locations con confirmación).
+- `/admin/organizations/:id` — detalle: sedes, usuarios, equipos, lecturas e incidentes (solo metadata, sin datos de temperatura).
+- `/admin/metrics` — KPIs globales + distribución por estado y plan + actualización en tiempo real (Realtime).
+
+**Cuentas de prueba:** todas las del seed usan `Password123!`. Platform admin: `admin@tempmonitor.dev`.
 
 Ver [`files/CHANGELOG.md`](./files/CHANGELOG.md) para el historial completo y [`files/BACKLOG.md`](./files/BACKLOG.md) para el backlog detallado.
 
