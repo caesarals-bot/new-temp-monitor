@@ -92,6 +92,39 @@ export async function countReadingsByLocation(
   return { count, error };
 }
 
+/**
+ * Cuenta las lecturas registradas hoy (desde el inicio del día local) para una
+ * sede. Reusa el patrón de 2 queries de `countReadingsByLocation` y filtra por
+ * `recorded_at >=` inicio de hoy. Alimenta el KPI "Lecturas hoy" del dashboard.
+ */
+export async function countReadingsTodayByLocation(
+  locationId: string,
+  now: Date = new Date()
+): Promise<{ count: number | null; error: PostgrestError | null }> {
+  const equipmentRes = await supabase.from('equipment').select('id').eq('location_id', locationId);
+
+  if (equipmentRes.error) {
+    return { count: null, error: equipmentRes.error };
+  }
+
+  const equipmentIds = (equipmentRes.data ?? []).map((e) => e.id);
+
+  if (equipmentIds.length === 0) {
+    return { count: 0, error: null };
+  }
+
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const { count, error } = await supabase
+    .from('temperature_readings')
+    .select('id', { count: 'exact', head: true })
+    .in('equipment_id', equipmentIds)
+    .gte('recorded_at', startOfToday.toISOString());
+
+  return { count, error };
+}
+
 export async function getReading(
   readingId: string
 ): Promise<{ data: TemperatureReading | null; error: PostgrestError | null }> {

@@ -16,7 +16,8 @@
 // Enums
 // ============================================================================
 
-export type BusinessTypeEnum = 'restaurant' | 'pharmacy' | 'butcher_shop' | 'supermarket' | 'general';
+export type BusinessTypeEnum =
+  'restaurant' | 'pharmacy' | 'butcher_shop' | 'supermarket' | 'general';
 export type PlanTypeEnum = 'basic' | 'pro' | 'enterprise';
 export type OrganizationStatusEnum = 'active' | 'paused' | 'suspended';
 export type UserRoleEnum = 'owner' | 'admin' | 'manager' | 'staff';
@@ -282,8 +283,52 @@ export interface Database {
         };
       };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Views: {
+      temperature_readings_summary: {
+        Row: {
+          id: string;
+          equipment_id: string;
+          reading_type: ReadingTypeEnum;
+          sensor_battery: number | null;
+          sensor_signal: number | null;
+          snapshot_min_temp: number | null;
+          snapshot_max_temp: number | null;
+          recorded_by_profile: string | null;
+          recorded_by_staff: string | null;
+          taken_by: string | null;
+          recorded_at: string;
+          organization_id: string;
+        };
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
+      };
+      incidents_summary: {
+        Row: {
+          id: string;
+          reading_id: string;
+          status: IncidentStatusEnum;
+          resolved_by: string | null;
+          resolved_at: string | null;
+          created_at: string;
+          organization_id: string;
+        };
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
+      };
+    };
+    Functions: {
+      create_organization_with_owner: {
+        Args: {
+          p_org_name: string;
+          p_business_type: BusinessTypeEnum;
+          p_plan_type: PlanTypeEnum;
+          p_owner_email: string;
+          p_owner_full_name: string;
+          p_user_id: string;
+        };
+        Returns: string;
+      };
+    };
     Enums: Record<string, never>;
   };
 }
@@ -292,9 +337,12 @@ export interface Database {
 // Convenience Types
 // ============================================================================
 
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type Insert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
-export type Update<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
+export type Tables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Row'];
+export type Insert<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Insert'];
+export type Update<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Update'];
 
 export type Organization = Tables<'organizations'>;
 export type Profile = Tables<'profiles'>;
@@ -304,3 +352,7 @@ export type Equipment = Tables<'equipment'>;
 export type Staff = Tables<'staff'>;
 export type TemperatureReading = Tables<'temperature_readings'>;
 export type Incident = Tables<'incidents'>;
+
+export type TemperatureReadingSummary =
+  Database['public']['Views']['temperature_readings_summary']['Row'];
+export type IncidentSummary = Database['public']['Views']['incidents_summary']['Row'];

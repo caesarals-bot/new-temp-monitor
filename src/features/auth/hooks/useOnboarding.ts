@@ -15,7 +15,13 @@ import { useAuthStore } from '../store/auth.store';
 
 export type OnboardingStep = 'organization' | 'location' | 'staff' | 'equipment' | 'confirmation';
 
-const STEP_ORDER: OnboardingStep[] = ['organization', 'location', 'staff', 'equipment', 'confirmation'];
+const STEP_ORDER: OnboardingStep[] = [
+  'organization',
+  'location',
+  'staff',
+  'equipment',
+  'confirmation',
+];
 
 interface UseOnboardingReturn {
   currentStep: OnboardingStep;
@@ -136,10 +142,6 @@ export function useOnboarding(): UseOnboardingReturn {
       });
       if (locationError || !createdLoc) {
         setError(locationError?.message ?? 'Error al crear sede');
-        return { success: false };
-      }
-      if (locationError || !createdLoc) {
-        setError(locationError ?? 'Error al crear sede');
         return { success: false };
       }
 

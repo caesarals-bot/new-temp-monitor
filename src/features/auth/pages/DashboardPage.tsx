@@ -1,8 +1,12 @@
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Alert, AlertDescription } from '@/shared/components/ui/alert';
+import { useDashboardData } from '@/features/auth/hooks/useDashboardData';
 
 export function DashboardPage() {
   const profile = useAuthStore((s) => s.profile);
+  const { equipmentCount, openIncidentCount, readingsTodayCount, isLoading, error } =
+    useDashboardData();
 
   return (
     <div className="p-8">
@@ -13,13 +17,21 @@ export function DashboardPage() {
         </p>
       </div>
 
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Equipos</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-[--color-eucalyptus]">0</p>
+            <p className="text-3xl font-bold text-[--color-eucalyptus]">
+              {isLoading && equipmentCount === null ? '—' : (equipmentCount ?? 0)}
+            </p>
             <p className="text-sm text-[--color-text-muted]">equipos registrados</p>
           </CardContent>
         </Card>
@@ -29,7 +41,7 @@ export function DashboardPage() {
             <CardTitle className="text-lg">Incidentes activos</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-[--color-danger]">0</p>
+            <p className="text-3xl font-bold text-[--color-danger]">{openIncidentCount}</p>
             <p className="text-sm text-[--color-text-muted]">incidentes abiertos</p>
           </CardContent>
         </Card>
@@ -39,7 +51,9 @@ export function DashboardPage() {
             <CardTitle className="text-lg">Lecturas hoy</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-[--color-eucalyptus]">0</p>
+            <p className="text-3xl font-bold text-[--color-eucalyptus]">
+              {isLoading && readingsTodayCount === null ? '—' : (readingsTodayCount ?? 0)}
+            </p>
             <p className="text-sm text-[--color-text-muted]">registros hoy</p>
           </CardContent>
         </Card>

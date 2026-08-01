@@ -5,6 +5,7 @@ import {
   listReadingsByLocation,
   latestReadingByEquipment,
   countReadingsByLocation,
+  countReadingsTodayByLocation,
   getReading,
   createReading,
   countReadingsByEquipment,
@@ -340,6 +341,56 @@ describe('readings.service · countReadingsByLocation', () => {
     (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select, eq });
 
     const { count, error } = await countReadingsByLocation('loc-1');
+
+    expect(count).toBeNull();
+    expect(error).toEqual({ message: 'loc boom' });
+  });
+});
+
+describe('readings.service · countReadingsTodayByLocation', () => {
+  it('returns 0 when location has no equipment', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: [], error: null });
+    const select = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select, eq });
+
+    const { count, error } = await countReadingsTodayByLocation('loc-1');
+
+    expect(count).toBe(0);
+    expect(error).toBeNull();
+  });
+
+  it('counts readings today filtering by recorded_at gte start of today', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: [{ id: 'eq-1' }], error: null });
+    const selectEq = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select: selectEq, eq });
+
+    const gte = vi.fn().mockResolvedValue({ count: 5, error: null });
+    const inFn = vi.fn(() => ({ gte }));
+    const selectR = vi.fn(() => ({ in: inFn }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      select: selectR,
+      in: inFn,
+      gte,
+    });
+
+    const fixedNow = new Date('2026-07-02T14:00:00Z');
+    const { count, error } = await countReadingsTodayByLocation('loc-1', fixedNow);
+
+    const startOfToday = new Date('2026-07-02T14:00:00Z');
+    startOfToday.setHours(0, 0, 0, 0);
+
+    expect(inFn).toHaveBeenCalledWith('equipment_id', ['eq-1']);
+    expect(gte).toHaveBeenCalledWith('recorded_at', startOfToday.toISOString());
+    expect(count).toBe(5);
+    expect(error).toBeNull();
+  });
+
+  it('propagates equipment query error', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: null, error: { message: 'loc boom' } });
+    const select = vi.fn(() => ({ eq }));
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({ select, eq });
+
+    const { count, error } = await countReadingsTodayByLocation('loc-1');
 
     expect(count).toBeNull();
     expect(error).toEqual({ message: 'loc boom' });

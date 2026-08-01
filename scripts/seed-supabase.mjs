@@ -35,6 +35,29 @@ if (!serviceRoleKey) {
   process.exit(1);
 }
 
+// --- GUARD DE AMBIENTE ---
+// El seed usa la service role key (acceso total a la BD). Por seguridad, solo
+// se ejecuta contra entornos de desarrollo/staging salvo que se confirme con
+// SEED_ENV=prod. Evita resetear contraseñas o datos de un proyecto productivo.
+const SEED_ENV = process.env.SEED_ENV || 'dev';
+const isDevLike = /localhost|supabase\.co\/project\/(dev|staging)|dev\.|staging\./i.test(supabaseUrl);
+if (!isDevLike && SEED_ENV !== 'prod') {
+  console.error(
+    '\x1b[31m✖ ABORTADO: la URL del proyecto no parece un entorno de desarrollo/staging.\x1b[0m'
+  );
+  console.error('  URL detectada: ' + supabaseUrl);
+  console.error(
+    '  Si REALMENTE querés ejecutar el seed contra este proyecto, seteá SEED_ENV=prod explícitamente.\n'
+  );
+  process.exit(1);
+}
+
+// --- RESET DE CONTRASEÑAS ---
+// Por defecto NO se resetean contraseñas de usuarios existentes. Para forzar
+// el reset (solo entornos de dev), usar SEED_RESET_PASSWORDS=true.
+const SEED_RESET_PASSWORDS = process.env.SEED_RESET_PASSWORDS === 'true';
+
+
 console.log('\x1b[32m✔ Variables de entorno cargadas con éxito.\x1b[0m');
 const supabase = createClient(supabaseUrl, serviceRoleKey, {
   auth: {
@@ -336,15 +359,18 @@ async function seed() {
         console.log(`  Usuario ya registrado en auth: ${u.email}`);
         actualId = existing.id;
         
-        // Reset password & update metadata para asegurar consistencia
-        const { error: updateError } = await supabase.auth.admin.updateUserById(actualId, {
-          password: 'Password123!',
-          user_metadata: { full_name: u.fullName }
-        });
+        // Actualizar metadatos para asegurar consistencia
+        const updateParams = { user_metadata: { full_name: u.fullName } };
+        if (SEED_RESET_PASSWORDS) {
+          updateParams.password = 'Password123!';
+        }
+
+        const { error: updateError } = await supabase.auth.admin.updateUserById(actualId, updateParams);
         if (updateError) {
-          console.warn(`  ⚠️ No se pudo resetear contraseña para ${u.email}: ${updateError.message}`);
+          console.warn(`  ⚠️ No se pudo actualizar ${u.email}: ${updateError.message}`);
         } else {
-          console.log(`  ✔ Contraseña y metadatos actualizados para ${u.email}`);
+          const resetNote = SEED_RESET_PASSWORDS ? ' (contraseña reseteada)' : '';
+          console.log(`  ✔ Metadatos actualizados para ${u.email}${resetNote}`);
         }
       } else {
         // Crear usuario nuevo forzando ID si es posible o autogenerado
@@ -474,11 +500,18 @@ async function seed() {
     }
 
     console.log('\n\x1b[32m✔ ✔ ¡BASE DE DATOS POPULADA Y SEED COMPLETADO EXITOSAMENTE! ✔ ✔\x1b[0m\n');
-    console.log('Credenciales de prueba creadas (todas usan contraseña: \x1b[36mPassword123!\x1b[0m):');
-    console.log('  - Dueño Resto Demo: \x1b[33mowner@restonorte.cl\x1b[0m');
-    console.log('  - Admin Resto Demo: \x1b[33madmin@restonorte.cl\x1b[0m');
-    console.log('  - Dueño Farmacia: \x1b[33mowner@farmavital.cl\x1b[0m');
+    console.log('Cuentas de prueba (contraseña de usuarios nuevos: \x1b[36mPassword123!\x1b[0m):');
+    console.log('  - Dev User:                \x1b[33mdev@tempmonitor.local\x1b[0m');
+    console.log('  - Dueño Resto Demo:        \x1b[33mowner@restonorte.cl\x1b[0m');
+    console.log('  - Admin Resto Demo:        \x1b[33madmin@restonorte.cl\x1b[0m');
+    console.log('  - Dueño Farmacia:          \x1b[33mowner@farmavital.cl\x1b[0m');
+    console.log('  - Admin Farmacia:          \x1b[33madmin@farmavital.cl\x1b[0m');
+    console.log('  - Manager Farmacia:        \x1b[33mmanager@farmavital.cl\x1b[0m');
+    console.log('  - Dueño Carnicería:        \x1b[33mowner@donpedro.cl\x1b[0m');
     console.log('  - Admin Global (Platform): \x1b[33madmin@tempmonitor.dev\x1b[0m\n');
+    if (SEED_RESET_PASSWORDS) {
+      console.log('\x1b[33m⚠️ SEED_RESET_PASSWORDS=true: se resetearon contraseñas de usuarios existentes a Password123!\x1b[0m\n');
+    }
 
   } catch (err) {
     console.error('\n\x1b[31m✖ ERROR CRÍTICO EJECUTANDO EL SEED:\x1b[0m');

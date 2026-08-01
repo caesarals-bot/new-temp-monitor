@@ -17,7 +17,9 @@ export function useOrganizationBootstrap() {
 
   useEffect(() => {
     if (!session || !profile?.organization_id) return;
-    if (organization) return;
+
+    // Si ya tenemos la organización y sedes cargadas, no hacer nada
+    if (organization && useOrganizationStore.getState().locations.length > 0) return;
 
     if (isDevBypassEnabled()) {
       useOrganizationStore.getState().setOrganization(getDevMockOrganization());
@@ -26,18 +28,9 @@ export function useOrganizationBootstrap() {
       return;
     }
 
-    let cancelled = false;
-
-    (async () => {
-      await fetchOrganization();
-      if (cancelled) return;
-      if (profile.organization_id) {
-        await fetchLocations(profile.organization_id);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    // Fetch both in parallel to avoid race conditions and improve load time.
+    // Nota: los fetch del store no son cancelables; la protección contra el
+    // doble disparo del HOTFIX-001 es el guard de estado de arriba.
+    void Promise.all([fetchOrganization(), fetchLocations(profile.organization_id!)]);
   }, [session, profile, organization, fetchOrganization, fetchLocations]);
 }

@@ -45,6 +45,13 @@ export default [
     },
   },
   {
-    ignores: ['node_modules/**', 'dist/**', '.husky/**', '*.config.js', 'vite.config.ts'],
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      '.husky/**',
+      '*.config.js',
+      'vite.config.ts',
+      'scripts/**/*.mjs',
+    ],
   },
 ];
