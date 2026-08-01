@@ -3,6 +3,7 @@ import {
   listOrganizations,
   getOrganizationDetail,
   updateOrganizationStatus,
+  updateOrganizationPlan,
   getGlobalMetrics,
 } from '@/features/platform-admin/services/platform-admin.service';
 import type { Organization } from '@/shared/types/supabase';
@@ -248,9 +249,9 @@ describe('platform-admin.service · getGlobalMetrics', () => {
         return makeChain(
           calls1,
           [
-            { id: 'o-1', status: 'active' },
-            { id: 'o-2', status: 'active' },
-            { id: 'o-3', status: 'paused' },
+            { id: 'o-1', name: 'Org A', status: 'active', plan_type: 'pro' },
+            { id: 'o-2', name: 'Org B', status: 'active', plan_type: 'basic' },
+            { id: 'o-3', name: 'Org C', status: 'paused', plan_type: 'enterprise' },
           ],
           null
         );
@@ -266,5 +267,64 @@ describe('platform-admin.service · getGlobalMetrics', () => {
     expect(data?.active_organizations).toBe(2);
     expect(data?.total_organizations).toBe(3);
     expect(data?.open_incidents).toBe(2);
+    expect(data?.by_status).toEqual({ active: 2, paused: 1, suspended: 0 });
+    expect(data?.by_plan).toEqual({ basic: 1, pro: 1, enterprise: 1 });
+    expect(data?.organizations).toHaveLength(3);
+  });
+});
+
+describe('platform-admin.service · updateOrganizationPlan', () => {
+  it('updates plan_type and max_locations for the organization', async () => {
+    const calls: Record<string, unknown[]> = {};
+    const org: Organization = {
+      id: 'org-1',
+      name: 'Farmacia Vital',
+      business_type: 'pharmacy',
+      status: 'active',
+      plan_type: 'enterprise',
+      max_locations: 20,
+      created_by: 'u-1',
+      created_at: '2026-04-02T08:30:00Z',
+    };
+    const chain = makeChain(calls, org, null);
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce(chain);
+
+    const { data, error } = await updateOrganizationPlan('org-1', {
+      planType: 'basic',
+      maxLocations: 1,
+    });
+
+    expect(supabase.from).toHaveBeenCalledWith('organizations');
+    expect(calls.update?.[0]).toEqual({ plan_type: 'basic', max_locations: 1 });
+    expect(calls.eq?.[0]).toEqual(['id', 'org-1']);
+    expect(data).toEqual(org);
+    expect(error).toBeNull();
+  });
+
+  it('returns error when update fails', async () => {
+    const chain = makeChain({}, null, { message: 'update denied' });
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce(chain);
+
+    const { data, error } = await updateOrganizationPlan('org-1', {
+      planType: 'pro',
+      maxLocations: 5,
+    });
+
+    expect(data).toBeNull();
+    expect(error).toEqual({ message: 'update denied' });
+  });
+
+  it('is a no-op in dev-bypass mode', async () => {
+    const { isDevBypassEnabled } = await import('@/shared/lib/dev-bypass');
+    (isDevBypassEnabled as ReturnType<typeof vi.fn>).mockReturnValueOnce(true);
+
+    const { data, error } = await updateOrganizationPlan('org-1', {
+      planType: 'pro',
+      maxLocations: 5,
+    });
+
+    expect(supabase.from).not.toHaveBeenCalled();
+    expect(data).toBeNull();
+    expect(error).toBeNull();
   });
 });

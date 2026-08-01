@@ -10,4 +10,5 @@ export type {
   OrganizationDetail,
   GlobalMetrics,
   ListOrganizationsParams,
+  UpdateOrganizationPlanInput,
 } from './services/platform-admin.service';

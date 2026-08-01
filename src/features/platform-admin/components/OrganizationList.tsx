@@ -10,6 +10,7 @@ export interface OrganizationListProps {
   isLoading: boolean;
   listError: string | null;
   onChangeStatus: (org: OrganizationListItem) => void;
+  onChangePlan: (org: OrganizationListItem) => void;
 }
 
 const businessTypeLabels: Record<string, string> = {
@@ -25,6 +26,7 @@ export function OrganizationList({
   isLoading,
   listError,
   onChangeStatus,
+  onChangePlan,
 }: OrganizationListProps) {
   if (listError) {
     return (
@@ -91,6 +93,9 @@ export function OrganizationList({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => onChangePlan(org)}>
+                Cambiar plan
+              </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => onChangeStatus(org)}>
                 Cambiar estado
               </Button>

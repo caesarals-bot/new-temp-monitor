@@ -14,12 +14,19 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { supabase } from '@/shared/lib/supabase';
 import {
   getGlobalMetrics,
   listOrganizations,
   updateOrganizationStatus,
+  updateOrganizationPlan,
 } from '../services/platform-admin.service';
-import type { GlobalMetrics, ListOrganizationsParams, OrganizationListItem } from '../types';
+import type {
+  GlobalMetrics,
+  ListOrganizationsParams,
+  OrganizationListItem,
+  UpdateOrganizationPlanInput,
+} from '../types';
 
 const PAGE_SIZE = 50;
 
@@ -55,6 +62,13 @@ export interface UsePlatformAdminReturn {
   isChangingStatus: boolean;
   statusError: string | null;
 
+  changingPlanFor: OrganizationListItem | null;
+  openPlanDialog: (org: OrganizationListItem) => void;
+  closePlanDialog: () => void;
+  submitPlanChange: (input: UpdateOrganizationPlanInput) => Promise<void>;
+  isChangingPlan: boolean;
+  planError: string | null;
+
   currentPage: number;
   totalPages: number;
   pageOrganizations: OrganizationListItem[];
@@ -78,6 +92,10 @@ export function usePlatformAdmin(): UsePlatformAdminReturn {
   const [changingStatusFor, setChangingStatusFor] = useState<OrganizationListItem | null>(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+
+  const [changingPlanFor, setChangingPlanFor] = useState<OrganizationListItem | null>(null);
+  const [isChangingPlan, setIsChangingPlan] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -122,6 +140,32 @@ export function usePlatformAdmin(): UsePlatformAdminReturn {
     void refreshMetrics();
   }, [refreshMetrics]);
 
+  // Realtime: cualquier cambio en `organizations` (INSERT/UPDATE/DELETE)
+  // refresca lista + métricas. Solo para platform admin. Cleanup al desmontar.
+  useEffect(() => {
+    if (!isPlatformAdmin) return;
+
+    const channel = supabase
+      .channel('platform-admin:organizations')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'organizations' }, () => {
+        void refreshList();
+        void refreshMetrics();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'organizations' }, () => {
+        void refreshList();
+        void refreshMetrics();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'organizations' }, () => {
+        void refreshList();
+        void refreshMetrics();
+      })
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [isPlatformAdmin, refreshList, refreshMetrics]);
+
   const setFilter = useCallback(
     <K extends keyof ListOrganizationsParams>(key: K, value: ListOrganizationsParams[K]) => {
       setFilters((prev) => ({ ...prev, [key]: value }));
@@ -165,6 +209,44 @@ export function usePlatformAdmin(): UsePlatformAdminReturn {
     [changingStatusFor, refreshMetrics, closeStatusDialog]
   );
 
+  const openPlanDialog = useCallback((org: OrganizationListItem) => {
+    setPlanError(null);
+    setChangingPlanFor(org);
+  }, []);
+
+  const closePlanDialog = useCallback(() => {
+    setChangingPlanFor(null);
+    setPlanError(null);
+    setIsChangingPlan(false);
+  }, []);
+
+  const submitPlanChange = useCallback(
+    async (input: UpdateOrganizationPlanInput) => {
+      if (!changingPlanFor) return;
+      setIsChangingPlan(true);
+      setPlanError(null);
+
+      const { error } = await updateOrganizationPlan(changingPlanFor.id, input);
+      setIsChangingPlan(false);
+
+      if (error) {
+        setPlanError(mapError(error.message));
+        return;
+      }
+
+      setOrganizations((prev) =>
+        prev.map((org) =>
+          org.id === changingPlanFor.id
+            ? { ...org, plan_type: input.planType, max_locations: input.maxLocations }
+            : org
+        )
+      );
+      void refreshMetrics();
+      closePlanDialog();
+    },
+    [changingPlanFor, refreshMetrics, closePlanDialog]
+  );
+
   const totalPages = Math.max(1, Math.ceil(organizations.length / PAGE_SIZE));
   const pageOrganizations = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
@@ -194,6 +276,12 @@ export function usePlatformAdmin(): UsePlatformAdminReturn {
     submitStatusChange,
     isChangingStatus,
     statusError,
+    changingPlanFor,
+    openPlanDialog,
+    closePlanDialog,
+    submitPlanChange,
+    isChangingPlan,
+    planError,
     currentPage,
     totalPages,
     pageOrganizations,

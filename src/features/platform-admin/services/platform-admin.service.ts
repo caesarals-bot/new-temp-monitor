@@ -54,6 +54,14 @@ export interface GlobalMetrics {
   total_organizations: number;
   readings_last_7_days: number;
   open_incidents: number;
+  by_status: Record<Organization['status'], number>;
+  by_plan: Record<Organization['plan_type'], number>;
+  organizations: {
+    id: string;
+    name: string;
+    status: Organization['status'];
+    plan_type: Organization['plan_type'];
+  }[];
 }
 
 export interface ListOrganizationsParams {
@@ -270,6 +278,29 @@ export async function updateOrganizationStatus(
   return { data: data as Organization | null, error };
 }
 
+export interface UpdateOrganizationPlanInput {
+  planType: Organization['plan_type'];
+  maxLocations: number;
+}
+
+export async function updateOrganizationPlan(
+  organizationId: string,
+  input: UpdateOrganizationPlanInput
+): Promise<{ data: Organization | null; error: PostgrestError | null }> {
+  if (isDevBypassEnabled()) {
+    return { data: null, error: null };
+  }
+
+  const { data, error } = await supabase
+    .from('organizations')
+    .update({ plan_type: input.planType, max_locations: input.maxLocations })
+    .eq('id', organizationId)
+    .select()
+    .single();
+
+  return { data: data as Organization | null, error };
+}
+
 export async function getGlobalMetrics(): Promise<{
   data: GlobalMetrics | null;
   error: PostgrestError | null;
@@ -281,10 +312,14 @@ export async function getGlobalMetrics(): Promise<{
     const active = mocks.filter((o) => o.status === 'active').length;
     let totalReadings = 0;
     let openIncidents = 0;
+    const byStatus: Record<Organization['status'], number> = { active: 0, paused: 0, suspended: 0 };
+    const byPlan: Record<Organization['plan_type'], number> = { basic: 0, pro: 0, enterprise: 0 };
     for (const m of mocks) {
       const c = getDevMockOrganizationCounts(m.id);
       totalReadings += c.readings;
       openIncidents += c.incidents_open;
+      byStatus[m.status] = (byStatus[m.status] ?? 0) + 1;
+      byPlan[m.plan_type] = (byPlan[m.plan_type] ?? 0) + 1;
     }
     return {
       data: {
@@ -292,6 +327,14 @@ export async function getGlobalMetrics(): Promise<{
         total_organizations: mocks.length,
         readings_last_7_days: totalReadings,
         open_incidents: openIncidents,
+        by_status: byStatus,
+        by_plan: byPlan,
+        organizations: mocks.map((m) => ({
+          id: m.id,
+          name: m.name,
+          status: m.status,
+          plan_type: m.plan_type,
+        })),
       },
       error: null,
     };
@@ -301,7 +344,7 @@ export async function getGlobalMetrics(): Promise<{
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
   const [orgsRes, readingsRes, incidentsRes] = await Promise.all([
-    supabase.from('organizations').select('id, status'),
+    supabase.from('organizations').select('id, name, status, plan_type'),
     supabase
       .from('temperature_readings_summary')
       .select('id', { count: 'exact', head: true })
@@ -315,15 +358,33 @@ export async function getGlobalMetrics(): Promise<{
   }
   if (incidentsRes.error) return { data: null, error: incidentsRes.error };
 
-  const orgs = (orgsRes.data ?? []) as Array<{ status: Organization['status'] }>;
-  const active = orgs.filter((o) => o.status === 'active').length;
+  const orgs = (orgsRes.data ?? []) as Array<{
+    id: string;
+    name: string;
+    status: Organization['status'];
+    plan_type: Organization['plan_type'];
+  }>;
+  const byStatus: Record<Organization['status'], number> = { active: 0, paused: 0, suspended: 0 };
+  const byPlan: Record<Organization['plan_type'], number> = { basic: 0, pro: 0, enterprise: 0 };
+  for (const o of orgs) {
+    byStatus[o.status] = (byStatus[o.status] ?? 0) + 1;
+    byPlan[o.plan_type] = (byPlan[o.plan_type] ?? 0) + 1;
+  }
 
   return {
     data: {
-      active_organizations: active,
+      active_organizations: byStatus.active,
       total_organizations: orgs.length,
       readings_last_7_days: 'count' in readingsRes ? (readingsRes.count ?? 0) : 0,
       open_incidents: (incidentsRes.data ?? []).length,
+      by_status: byStatus,
+      by_plan: byPlan,
+      organizations: orgs.map((o) => ({
+        id: o.id,
+        name: o.name,
+        status: o.status,
+        plan_type: o.plan_type,
+      })),
     },
     error: null,
   };

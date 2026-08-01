@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/shared/components/ui/card';
 import { OrganizationFiltersBar } from './OrganizationFilters';
 import { OrganizationList } from './OrganizationList';
 import { OrganizationStatusDialog } from './OrganizationStatusDialog';
+import { OrganizationPlanDialog } from './OrganizationPlanDialog';
 import { GlobalMetricsCards } from './GlobalMetrics';
 import type { UsePlatformAdminReturn } from '../hooks/usePlatformAdmin';
 
@@ -27,6 +28,12 @@ export function PlatformDashboard({ hook }: PlatformDashboardProps) {
     submitStatusChange,
     isChangingStatus,
     statusError,
+    changingPlanFor,
+    openPlanDialog,
+    closePlanDialog,
+    submitPlanChange,
+    isChangingPlan,
+    planError,
   } = hook;
 
   return (
@@ -44,6 +51,7 @@ export function PlatformDashboard({ hook }: PlatformDashboardProps) {
         isLoading={isLoadingList}
         listError={listError}
         onChangeStatus={openStatusDialog}
+        onChangePlan={openPlanDialog}
       />
 
       <OrganizationStatusDialog
@@ -55,6 +63,17 @@ export function PlatformDashboard({ hook }: PlatformDashboardProps) {
           if (!open) closeStatusDialog();
         }}
         onSubmit={submitStatusChange}
+      />
+
+      <OrganizationPlanDialog
+        open={changingPlanFor !== null}
+        org={changingPlanFor}
+        isChanging={isChangingPlan}
+        planError={planError}
+        onOpenChange={(open) => {
+          if (!open) closePlanDialog();
+        }}
+        onSubmit={submitPlanChange}
       />
 
       <p className="text-xs text-[--color-text-muted]">
