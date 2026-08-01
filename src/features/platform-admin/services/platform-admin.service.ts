@@ -125,9 +125,8 @@ export async function listOrganizations(
       plan_type,
       max_locations,
       created_at,
-      locations (id),
-      profiles (id),
-      equipment (id)
+      locations (id, equipment (id)),
+      profiles (id)
     `
     )
     .order('created_at', { ascending: false });
@@ -141,9 +140,8 @@ export async function listOrganizations(
 
   const rows = (data ?? []) as unknown as Array<
     Omit<OrganizationListItem, 'locations_count' | 'profiles_count' | 'equipment_count'> & {
-      locations: { id: string }[];
+      locations: { id: string; equipment: { id: string }[] }[];
       profiles: { id: string }[];
-      equipment: { id: string }[];
     }
   >;
 
@@ -157,7 +155,7 @@ export async function listOrganizations(
     created_at: r.created_at,
     locations_count: r.locations?.length ?? 0,
     profiles_count: r.profiles?.length ?? 0,
-    equipment_count: r.equipment?.length ?? 0,
+    equipment_count: r.locations?.reduce((acc, l) => acc + (l.equipment?.length ?? 0), 0) ?? 0,
   }));
 
   return { data: items, error: null };

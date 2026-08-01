@@ -126,6 +126,36 @@ describe('platform-admin.service · listOrganizations', () => {
     expect(data).toBeNull();
     expect(error).toEqual({ message: 'boom' });
   });
+
+  it('computes equipment_count via locations->equipment join (no direct FK)', async () => {
+    const calls: Record<string, unknown[]> = {};
+    const rows = [
+      {
+        id: 'org-1',
+        name: 'Org A',
+        business_type: 'restaurant',
+        status: 'active',
+        plan_type: 'pro',
+        max_locations: 5,
+        created_at: '2026-06-01T00:00:00Z',
+        locations: [
+          { id: 'loc-1', equipment: [{ id: 'eq-1' }, { id: 'eq-2' }] },
+          { id: 'loc-2', equipment: [{ id: 'eq-3' }] },
+        ],
+        profiles: [{ id: 'u-1' }, { id: 'u-2' }],
+      },
+    ];
+    const chain = makeChain(calls, rows, null);
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValueOnce(chain);
+
+    const { data, error } = await listOrganizations();
+
+    expect(error).toBeNull();
+    expect(data).toHaveLength(1);
+    expect(data?.[0]?.locations_count).toBe(2);
+    expect(data?.[0]?.equipment_count).toBe(3);
+    expect(data?.[0]?.profiles_count).toBe(2);
+  });
 });
 
 describe('platform-admin.service · getOrganizationDetail', () => {
