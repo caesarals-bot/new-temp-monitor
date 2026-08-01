@@ -17,7 +17,14 @@ interface SidebarProps {
   closeButtonRef?: RefObject<HTMLButtonElement | null>;
 }
 
-export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, label, closeButtonRef }: SidebarProps) {
+export function Sidebar({
+  mode = 'fixed',
+  isOpen = false,
+  onClose,
+  className,
+  label,
+  closeButtonRef,
+}: SidebarProps) {
   const organization = useOrganizationStore((s) => s.organization);
   const isPlatformAdmin = useAuthStore((s) => s.profile?.is_platform_admin ?? false);
 
@@ -102,7 +109,7 @@ export function Sidebar({ mode = 'fixed', isOpen = false, onClose, className, la
   return (
     <aside
       className={cn(
-        'hidden md:flex h-screen w-60 shrink-0 flex-col border-r border-[--color-slate-700] bg-[--color-slate-900] text-white',
+        'hidden md:flex sticky top-0 h-screen w-60 shrink-0 flex-col border-r border-[--color-slate-700] bg-[--color-slate-900] text-white',
         className
       )}
       aria-label={label ?? 'Navegación de la aplicación'}
