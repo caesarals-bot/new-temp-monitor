@@ -59,6 +59,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         if (profileData) {
           set({ profile: profileData });
         }
+        // El profile ya está cargado: marcar hydrated para que las
+        // redirecciones post-login no corran con profile=null.
+        set({ isHydrated: true });
       }
 
       return { error: null };

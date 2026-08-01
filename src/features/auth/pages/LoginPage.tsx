@@ -22,6 +22,7 @@ export function LoginPage() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const session = useAuthStore((s) => s.session);
   const profile = useAuthStore((s) => s.profile);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
   const organization = useOrganizationStore((s) => s.organization);
   const fetchOrganization = useOrganizationStore((s) => s.fetchOrganization);
   const fetchLocations = useOrganizationStore((s) => s.fetchLocations);
@@ -34,6 +35,11 @@ export function LoginPage() {
   }, [session, profile, organization, fetchOrganization]);
 
   useEffect(() => {
+    // Esperar a que el profile esté cargado antes de decidir la redirección.
+    // Sin esto, al hacer login el profile aún es null (fetch async) y el
+    // platform admin cae en /onboarding por error.
+    if (!isHydrated) return;
+
     if (session && profile?.organization_id && organization) {
       fetchLocations(organization.id);
       navigate('/', { replace: true });
@@ -45,7 +51,7 @@ export function LoginPage() {
       // platform admin sin organización: ir directo al panel admin
       navigate('/admin/organizations', { replace: true });
     }
-  }, [session, profile, organization, fetchLocations, navigate]);
+  }, [isHydrated, session, profile, organization, fetchLocations, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
