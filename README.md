@@ -12,20 +12,20 @@ SaaS B2B multi-tenant para monitoreo de cadena de frío. PWA construida con Reac
 
 ## Stack
 
-| Capa | Tecnología |
-|------|-----------|
-| Framework | React 19 |
-| Lenguaje | TypeScript 5.x (strict mode) |
-| Build | Vite 8.x |
-| Estilos | Tailwind CSS v4 (CSS-first) |
-| Routing | React Router v8 (SPA mode) |
-| Estado global | Zustand 5.x |
-| Backend | Supabase (Auth + DB + RLS) |
-| UI | shadcn/ui (tema Operational Calm) |
-| Formularios | React Hook Form + Zod |
-| Testing | Vitest + Testing Library |
-| Linting | ESLint + Prettier + Husky (pre-commit) |
-| Package manager | pnpm |
+| Capa            | Tecnología                             |
+| --------------- | -------------------------------------- |
+| Framework       | React 19                               |
+| Lenguaje        | TypeScript 5.x (strict mode)           |
+| Build           | Vite 8.x                               |
+| Estilos         | Tailwind CSS v4 (CSS-first)            |
+| Routing         | React Router v8 (SPA mode)             |
+| Estado global   | Zustand 5.x                            |
+| Backend         | Supabase (Auth + DB + RLS)             |
+| UI              | shadcn/ui (tema Operational Calm)      |
+| Formularios     | React Hook Form + Zod                  |
+| Testing         | Vitest + Testing Library               |
+| Linting         | ESLint + Prettier + Husky (pre-commit) |
+| Package manager | pnpm                                   |
 
 ---
 
@@ -63,16 +63,16 @@ Regla: **feature-first**. Los componentes de `readings` no importan de `incident
 
 ## Scripts
 
-| Comando | Descripción |
-|---------|-------------|
-| `pnpm dev` | Inicia el servidor de desarrollo |
-| `pnpm build` | Compila TypeScript (`tsc -b`) y construye con Vite |
-| `pnpm preview` | Previsualiza la build de producción |
-| `pnpm test` | Ejecuta los tests en modo watch |
-| `pnpm test:run` | Ejecuta los tests una sola vez |
-| `pnpm lint` | Corre ESLint sobre todo el repo |
-| `pnpm lint:fix` | Corrige errores de ESLint automáticamente |
-| `pnpm format` | Formatea con Prettier |
+| Comando         | Descripción                                        |
+| --------------- | -------------------------------------------------- |
+| `pnpm dev`      | Inicia el servidor de desarrollo                   |
+| `pnpm build`    | Compila TypeScript (`tsc -b`) y construye con Vite |
+| `pnpm preview`  | Previsualiza la build de producción                |
+| `pnpm test`     | Ejecuta los tests en modo watch                    |
+| `pnpm test:run` | Ejecuta los tests una sola vez                     |
+| `pnpm lint`     | Corre ESLint sobre todo el repo                    |
+| `pnpm lint:fix` | Corrige errores de ESLint automáticamente          |
+| `pnpm format`   | Formatea con Prettier                              |
 
 ---
 
@@ -120,7 +120,7 @@ Detalles completos en [`files/AGENT.md`](./files/AGENT.md).
 
 ## Estado del proyecto
 
-**Última tarea cerrada:** TASK-008 — Formulario de registro de lectura manual  
+**Última tarea cerrada:** HOTFIX-001 — Resolución de carga vacía de Sedes, Personal y Equipos
 **Tests:** 452 pasando  
 **Próxima tarea:** TASK-009 — Dashboard de lecturas con estado en tiempo real
 
