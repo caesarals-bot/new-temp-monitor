@@ -6,7 +6,13 @@ import { useOrganizationStore } from '@/features/organizations/store/organizatio
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/components/ui/card';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -33,8 +39,11 @@ export function LoginPage() {
       navigate('/', { replace: true });
     } else if (session && profile?.organization_id) {
       // still loading org
-    } else if (session && !profile?.organization_id) {
+    } else if (session && !profile?.organization_id && !profile?.is_platform_admin) {
       navigate('/onboarding', { replace: true });
+    } else if (session && !profile?.organization_id && profile?.is_platform_admin) {
+      // platform admin sin organización: ir directo al panel admin
+      navigate('/admin/organizations', { replace: true });
     }
   }, [session, profile, organization, fetchLocations, navigate]);
 
