@@ -239,98 +239,250 @@ const equipment = [
   { id: '00000000-0000-0000-0000-00000000d301', location_id: '00000000-0000-0000-0000-00000000b006', name: 'Cámara Carnes Vacuno', physical_location: 'Sector desposte', code: 'EQ-CDP-001', min_temp: -2.0, max_temp: 2.0 }
 ];
 
-const readings = [
-  // Empresa Demo
-  { id: '00000000-0000-0000-0000-000000000401', equipment_id: '00000000-0000-0000-0000-000000000301', value: 3.5, recorded_by_profile: '00000000-0000-0000-0000-000000000001', recorded_by_staff: '00000000-0000-0000-0000-000000000201', recorded_at: '2026-07-01T08:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000402', equipment_id: '00000000-0000-0000-0000-000000000301', value: 8.2, recorded_by_profile: '00000000-0000-0000-0000-000000000001', recorded_by_staff: '00000000-0000-0000-0000-000000000202', recorded_at: '2026-06-30T16:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000403', equipment_id: '00000000-0000-0000-0000-000000000302', value: -18.0, recorded_by_profile: '00000000-0000-0000-0000-000000000001', recorded_by_staff: '00000000-0000-0000-0000-000000000201', recorded_at: '2026-07-01T08:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000404', equipment_id: '00000000-0000-0000-0000-000000000303', value: 1.5, recorded_by_profile: '00000000-0000-0000-0000-000000000001', taken_by: 'Inspector de turno', recorded_at: '2026-07-01T08:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000405', equipment_id: '00000000-0000-0000-0000-000000000304', value: 4.0, recorded_by_profile: '00000000-0000-0000-0000-000000000001', recorded_by_staff: '00000000-0000-0000-0000-000000000203', recorded_at: '2026-06-30T16:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000406', equipment_id: '00000000-0000-0000-0000-000000000304', value: 9.5, recorded_by_profile: '00000000-0000-0000-0000-000000000001', recorded_by_staff: '00000000-0000-0000-0000-000000000204', recorded_at: '2026-06-30T16:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000407', equipment_id: '00000000-0000-0000-0000-000000000305', value: -15.0, recorded_by_profile: '00000000-0000-0000-0000-000000000001', recorded_by_staff: '00000000-0000-0000-0000-000000000203', recorded_at: '2026-07-01T08:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000408', equipment_id: '00000000-0000-0000-0000-000000000303', value: 2.5, recorded_by_profile: '00000000-0000-0000-0000-000000000001', recorded_by_staff: '00000000-0000-0000-0000-000000000202', recorded_at: '2026-06-29T10:00:00Z' },
-  
-  // Restaurante Demo Norte
-  { id: '00000000-0000-0000-0000-000000000501', equipment_id: '00000000-0000-0000-0000-00000000d101', value: 2.2, recorded_by_profile: '00000000-0000-0000-0000-00000000c001', recorded_by_staff: '00000000-0000-0000-0000-00000000e101', recorded_at: '2026-07-01T09:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000502', equipment_id: '00000000-0000-0000-0000-00000000d101', value: 6.8, recorded_by_profile: '00000000-0000-0000-0000-00000000c001', recorded_by_staff: '00000000-0000-0000-0000-00000000e102', recorded_at: '2026-06-30T10:30:00Z' },
-  { id: '00000000-0000-0000-0000-000000000503', equipment_id: '00000000-0000-0000-0000-00000000d102', value: -14.2, recorded_by_profile: '00000000-0000-0000-0000-00000000c001', recorded_by_staff: '00000000-0000-0000-0000-00000000e101', recorded_at: '2026-07-01T09:00:00Z' },
-  
-  // Farmacia Vital
-  { id: '00000000-0000-0000-0000-000000000601', equipment_id: '00000000-0000-0000-0000-00000000d201', value: 4.5, recorded_by_profile: '00000000-0000-0000-0000-00000000c003', recorded_by_staff: '00000000-0000-0000-0000-00000000e201', recorded_at: '2026-07-01T10:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000602', equipment_id: '00000000-0000-0000-0000-00000000d201', value: 1.2, recorded_by_profile: '00000000-0000-0000-0000-00000000c003', recorded_by_staff: '00000000-0000-0000-0000-00000000e201', recorded_at: '2026-06-30T14:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000603', equipment_id: '00000000-0000-0000-0000-00000000d203', value: 5.1, recorded_by_profile: '00000000-0000-0000-0000-00000000c003', recorded_by_staff: null, recorded_at: '2026-07-01T11:00:00Z' },
-  
-  // Carnicería Don Pedro
-  { id: '00000000-0000-0000-0000-000000000701', equipment_id: '00000000-0000-0000-0000-00000000d301', value: -0.5, recorded_by_profile: '00000000-0000-0000-0000-00000000c006', recorded_by_staff: null, recorded_at: '2026-07-01T12:00:00Z' },
-  { id: '00000000-0000-0000-0000-000000000702', equipment_id: '00000000-0000-0000-0000-00000000d301', value: 3.8, recorded_by_profile: '00000000-0000-0000-0000-00000000c006', recorded_at: '2026-06-30T09:00:00Z' }
+// --- GENERADOR DE SEMANA DE DATOS DEMO (determinista) ---
+// Reemplaza las lecturas/incidentes estáticos por una semana completa por
+// equipo. RNG sembrado (mulberry32) para que re-ejecutar el seed produzca
+// exactamente los mismos valores e ids (upsert = reemplazo idéntico).
+
+// RNG determinista: mulberry32 (dominio público, sin dependencias).
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Gaussiana aproximada (Box-Muller) para temperaturas alrededor del rango.
+function gaussian(rng) {
+  let u = 0;
+  let v = 0;
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+// Fecha ISO con hora local; determinista (basada en día y slot).
+function readingDate(dayOffset, slotIndex) {
+  // Slot cada 2h desde las 06:00 (12 slots: 06,08,...,04 del día siguiente).
+  const hour = 6 + slotIndex * 2;
+  const d = new Date(Date.UTC(2026, 6, 24 + dayOffset, hour, 0, 0));
+  return d.toISOString();
+}
+
+// IDs de las 18 lecturas originales del seed v1 (preservadas como "espejo"
+// de la semana para no dejar datos huérfanos y conservar los incidentes
+// originales con sus reading_id). Mapeadas por equipo → slots del día 0.
+const LEGACY_READING_IDS = {
+  '00000000-0000-0000-0000-000000000301': [
+    '00000000-0000-0000-0000-000000000401',
+    '00000000-0000-0000-0000-000000000402',
+    '00000000-0000-0000-0000-000000000408'
+  ],
+  '00000000-0000-0000-0000-000000000302': ['00000000-0000-0000-0000-000000000403'],
+  '00000000-0000-0000-0000-000000000303': ['00000000-0000-0000-0000-000000000404'],
+  '00000000-0000-0000-0000-000000000304': [
+    '00000000-0000-0000-0000-000000000405',
+    '00000000-0000-0000-0000-000000000406'
+  ],
+  '00000000-0000-0000-0000-000000000305': ['00000000-0000-0000-0000-000000000407'],
+  '00000000-0000-0000-0000-00000000d101': [
+    '00000000-0000-0000-0000-000000000501',
+    '00000000-0000-0000-0000-000000000502'
+  ],
+  '00000000-0000-0000-0000-00000000d102': ['00000000-0000-0000-0000-000000000503'],
+  '00000000-0000-0000-0000-00000000d201': [
+    '00000000-0000-0000-0000-000000000601',
+    '00000000-0000-0000-0000-000000000602'
+  ],
+  '00000000-0000-0000-0000-00000000d203': ['00000000-0000-0000-0000-000000000603'],
+  '00000000-0000-0000-0000-00000000d301': [
+    '00000000-0000-0000-0000-000000000701',
+    '00000000-0000-0000-0000-000000000702'
+  ]
+};
+
+// ID determinista de lectura: usa el legacy id si el equipo lo tiene para el
+// slot (día 0, slots 0..n), si no genera `7d...` (suffix 8 + slot 2 chars).
+function readingId(equipmentId, dayOffset, slotIndex) {
+  if (dayOffset === 0) {
+    const legacy = LEGACY_READING_IDS[equipmentId];
+    if (legacy && slotIndex < legacy.length) return legacy[slotIndex];
+  }
+  const suffix = equipmentId.replace(/-/g, '').slice(-8);
+  // Índice global del slot en la semana (0..83): siempre 2 dígitos.
+  const n = dayOffset * READINGS_PER_DAY + slotIndex;
+  return `00000000-0000-0000-0000-7d${suffix}${String(n).padStart(2, '0')}`;
+}
+
+const READINGS_PER_DAY = 12; // cada 2h: 06:00 → 04:00
+const DEMO_DAYS = 7; // semana cerrada 2026-07-24 → 2026-07-30
+
+// Profiles/org → id real del profile (mapeo email → id real del auth user).
+const profileByOrgId = (orgId) =>
+  usersToCreate
+    .filter((u) => u.orgId === orgId)
+    .map((u) => ({ id: u.id, email: u.email }));
+
+// Staff de una sede (los mocks usan ids fijos que coinciden con staff).
+const staffByLocationId = (locationId) =>
+  staff.filter((s) => s.location_id === locationId);
+
+// Equipos IoT de la farmacia (para probar filtro reading_type='iot').
+const IOT_EQUIPMENT_IDS = new Set([
+  '00000000-0000-0000-0000-00000000d201',
+  '00000000-0000-0000-0000-00000000d203'
+]);
+
+// Acciones correctivas realistas (≥20 chars, patrón HACCP).
+const ACTION_TEMPLATES = [
+  'Se reubicó mercadería al equipo de respaldo y se ajustó el termostato.',
+  'Se detectó puerta mal cerrada; se corrigió y se monitoreó la recuperación.',
+  'Se llamó a servicio técnico y se trasladó el producto a cámara alterna.',
+  'Se descongeló el equipo, se limpiaron las rejillas y se normalizó el ciclo.',
+  'Se calibró el sensor y se verificó la temperatura durante 30 minutos.',
+  'Se aisló el lote afectado para inspección y se ajustó el setpoint.'
 ];
 
-const incidents = [
-  // Empresa Demo
-  {
-    id: '00000000-0000-0000-0000-000000000801',
-    reading_id: '00000000-0000-0000-0000-000000000402',
-    status: 'open',
-    description: 'Temperatura alta detectada en Refrigerador Lácteos (8.2°C)',
-    action_taken: null,
-    resolved_by: null,
-    resolved_at: null,
-    created_at: '2026-06-30T16:00:00Z'
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000802',
-    reading_id: '00000000-0000-0000-0000-000000000404',
-    status: 'resolved',
-    description: 'Temperatura baja detectada en Vitrina Refrigerada (1.5°C)',
-    action_taken: 'Se reguló el flujo de aire y se ajustó el termostato manualmente.',
-    resolved_by: '00000000-0000-0000-0000-000000000001',
-    resolved_at: '2026-07-01T08:15:00Z',
-    created_at: '2026-07-01T08:00:00Z'
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000803',
-    reading_id: '00000000-0000-0000-0000-000000000406',
-    status: 'resolved',
-    description: 'Temperatura alta detectada en Refrigerador Bebidas (9.5°C)',
-    action_taken: 'Se detectó puerta mal cerrada. Se procedió a cerrar y ventilar.',
-    resolved_by: '00000000-0000-0000-0000-000000000001',
-    resolved_at: '2026-06-30T17:00:00Z',
-    created_at: '2026-06-30T16:00:00Z'
-  },
-  // Restaurante Demo Norte
-  {
-    id: '00000000-0000-0000-0000-000000000804',
-    reading_id: '00000000-0000-0000-0000-000000000502',
-    status: 'open',
-    description: 'Temperatura alta detectada en Cámara de Frío (6.8°C)',
-    action_taken: null,
-    resolved_by: null,
-    resolved_at: null,
-    created_at: '2026-06-30T10:30:00Z'
-  },
-  // Farmacia Vital
-  {
-    id: '00000000-0000-0000-0000-000000000805',
-    reading_id: '00000000-0000-0000-0000-000000000602',
-    status: 'resolved',
-    description: 'Temperatura baja crítica detectada en Refrigerador Vacunas A (1.2°C)',
-    action_taken: 'Se trasladaron vacunas a refrigerador de respaldo B y se llamó a servicio técnico.',
-    resolved_by: '00000000-0000-0000-0000-00000000c003',
-    resolved_at: '2026-06-30T15:00:00Z',
-    created_at: '2026-06-30T14:00:00Z'
-  },
-  // Carnicería Don Pedro
-  {
-    id: '00000000-0000-0000-0000-000000000806',
-    reading_id: '00000000-0000-0000-0000-000000000702',
-    status: 'open',
-    description: 'Temperatura alta detectada en Cámara Carnes Vacuno (3.8°C)',
-    action_taken: null,
-    resolved_by: null,
-    resolved_at: null,
-    created_at: '2026-06-30T09:00:00Z'
+function generateReadings() {
+  const list = [];
+  const rng = mulberry32(20260724);
+
+  for (const eq of equipment) {
+    const orgId = locations.find((l) => l.id === eq.location_id)?.organization_id;
+    const orgProfiles = profileByOrgId(orgId);
+    const eqStaff = staffByLocationId(eq.location_id);
+    const isIot = IOT_EQUIPMENT_IDS.has(eq.id);
+    const midpoint = (Number(eq.min_temp) + Number(eq.max_temp)) / 2;
+    const halfSpan = (Number(eq.max_temp) - Number(eq.min_temp)) / 2;
+    // Desvíos por equipo: 1-3 lecturas fuera de rango en la semana.
+    const outOfRangeCount = 1 + Math.floor(rng() * 3); // 1..3
+    const outOfRangeSlots = new Set();
+    while (outOfRangeSlots.size < outOfRangeCount) {
+      outOfRangeSlots.add(Math.floor(rng() * (DEMO_DAYS * READINGS_PER_DAY)));
+    }
+
+    for (let day = 0; day < DEMO_DAYS; day++) {
+      for (let slot = 0; slot < READINGS_PER_DAY; slot++) {
+        const slotIndex = day * READINGS_PER_DAY + slot;
+        let value;
+
+        if (outOfRangeSlots.has(slotIndex)) {
+          // Desvío realista: alto (70%) o bajo (30%), 1.2x-2x el rango.
+          const isHigh = rng() < 0.7;
+          value = isHigh
+            ? Number(eq.max_temp) + (0.5 + rng() * halfSpan * 0.6)
+            : Number(eq.min_temp) - (0.5 + rng() * halfSpan * 0.6);
+        } else {
+          // Normal: gaussiana alrededor del punto medio, truncada al rango.
+          let v = midpoint + gaussian(rng) * 1.2;
+          v = Math.max(Number(eq.min_temp), Math.min(Number(eq.max_temp), v));
+          value = v;
+        }
+
+        // Redondear a 1 decimal (consistente con DECIMAL del schema).
+        value = Math.round(value * 10) / 10;
+
+        const profile = orgProfiles[slot % Math.max(1, orgProfiles.length)];
+        const staffMember = eqStaff[slot % Math.max(1, eqStaff.length)];
+
+        list.push({
+          id: readingId(eq.id, day, slot),
+          equipment_id: eq.id,
+          value,
+          reading_type: isIot ? 'iot' : 'manual',
+          snapshot_min_temp: eq.min_temp,
+          snapshot_max_temp: eq.max_temp,
+          recorded_by_profile: profile?.id ?? null,
+          recorded_by_staff: staffMember?.id ?? null,
+          taken_by: isIot ? null : (staffMember?.name ?? null),
+          recorded_at: readingDate(day, slot)
+        });
+      }
+    }
   }
-];
+  return list;
+}
+
+function generateIncidents(readings) {
+  const list = [];
+  const rng = mulberry32(20260731);
+
+  // Límite de incidentes por organización (1-3 según el plan) y mantener
+  // los 6 originales (sus reading_id legacy ya están en la semana).
+  const orgIncidentBudget = new Map();
+  const getBudget = (orgId) => {
+    if (!orgIncidentBudget.has(orgId)) {
+      // Determinista: 2-3 incidentes por org (farmacia puede tener 3).
+      orgIncidentBudget.set(orgId, 2 + Math.floor(rng() * 2));
+    }
+    return orgIncidentBudget.get(orgId);
+  };
+
+  let n = 0;
+
+  // Índice de lecturas fuera de rango ordenadas por fecha (recientes primero).
+  const outOfRange = [];
+  for (const r of readings) {
+    const eq = equipment.find((e) => e.id === r.equipment_id);
+    if (!eq) continue;
+    if (r.value > Number(eq.max_temp) || r.value < Number(eq.min_temp)) {
+      outOfRange.push({ r, eq });
+    }
+  }
+  outOfRange.sort((a, b) => new Date(b.r.recorded_at) - new Date(a.r.recorded_at));
+
+  for (const { r, eq } of outOfRange) {
+    const orgId = locations.find((l) => l.id === eq.location_id)?.organization_id;
+    if (orgId && getBudget(orgId) <= 0) continue; // presupuesto por org agotado
+
+    const direction = r.value > Number(eq.max_temp) ? 'alta' : 'baja';
+    // ID determinista: mismo equipo → mismo incidente (upsert estable).
+    // Grupo 4to del UUID = 12 chars: `7d` + suffix(8) + n(2).
+    const suffix = r.equipment_id.replace(/-/g, '').slice(-8);
+    const id = `00000000-0000-0000-0000-7d${suffix}${String(n).padStart(2, '0')}`;
+    n++;
+
+    // Últimas 48h de la semana → abierto (aún sin resolver); antes → resuelto.
+    const createdAt = new Date(r.recorded_at);
+    const last48h = Date.UTC(2026, 6, 30, 6, 0, 0); // 2026-07-30T06:00Z
+    const isOpen = createdAt.getTime() >= last48h;
+    const eqName = eq.name;
+    const template = ACTION_TEMPLATES[Math.floor(rng() * ACTION_TEMPLATES.length)];
+
+    const incident = {
+      id,
+      reading_id: r.id,
+      status: isOpen ? 'open' : 'resolved',
+      description: `Temperatura ${direction} detectada en ${eqName} (${r.value}°C)`,
+      action_taken: isOpen ? null : template,
+      resolved_by: null,
+      resolved_at: null,
+      created_at: r.recorded_at
+    };
+
+    if (!isOpen) {
+      // Resolver 1-2h después, por el profile que registró la lectura.
+      const resolvedAt = new Date(createdAt.getTime() + (60 + rng() * 60) * 60 * 1000);
+      incident.resolved_by = r.recorded_by_profile;
+      incident.resolved_at = resolvedAt.toISOString();
+    }
+
+    list.push(incident);
+
+    if (orgId) {
+      // Consumir presupuesto solo cuando se genera un incidente de esa org.
+      orgIncidentBudget.set(orgId, getBudget(orgId) - 1);
+    }
+  }
+  return list;
+}
+
+const readings = generateReadings();
+const incidents = generateIncidents(readings);
 
 async function seed() {
   console.log('\n\x1b[34m--- Iniciando Carga de Datos (Seed) ---\x1b[0m');
@@ -409,9 +561,28 @@ async function seed() {
     }
 
     // 3. Cargar Sedes (Locations)
+    // IMPORTANTE: el trigger `check_location_limit` se dispara en INSERT y
+    // bloquea el upsert de una sede existente cuando la org ya está en el
+    // límite (el BEFORE INSERT corre antes de resolver el conflicto). Para
+    // re-ejecutar el seed de forma idempotente sin tocar BD, las sedes
+    // existentes se actualizan con UPDATE (que no dispara el trigger) y solo
+    // las nuevas usan INSERT.
     console.log('\nCargando sedes (locations)...');
     for (const loc of locations) {
-      const { error } = await supabase.from('locations').upsert(loc);
+      const { data: existing } = await supabase
+        .from('locations')
+        .select('id')
+        .eq('id', loc.id)
+        .maybeSingle();
+
+      let result;
+      if (existing) {
+        result = await supabase.from('locations').update(loc).eq('id', loc.id);
+      } else {
+        result = await supabase.from('locations').insert(loc);
+      }
+
+      const { error } = result;
       if (error) throw new Error(`Error en sede ${loc.name}: ${error.message}`);
       console.log(`  ✔ Sede cargada: ${loc.name}`);
     }
@@ -456,6 +627,7 @@ async function seed() {
 
     // 7. Cargar Lecturas de Temperatura
     console.log('\nCargando historial de lecturas de temperatura...');
+    let readingsCount = 0;
     for (const rd of readings) {
       // Mapear el ID real del perfil que registró la lectura
       const profile = usersToCreate.find(u => u.id === rd.recorded_by_profile);
@@ -465,7 +637,9 @@ async function seed() {
         id: rd.id,
         equipment_id: rd.equipment_id,
         value: rd.value,
-        reading_type: 'manual',
+        reading_type: rd.reading_type,
+        snapshot_min_temp: rd.snapshot_min_temp,
+        snapshot_max_temp: rd.snapshot_max_temp,
         recorded_by_profile: actualProfileId,
         recorded_by_staff: rd.recorded_by_staff,
         taken_by: rd.taken_by || null,
@@ -474,11 +648,14 @@ async function seed() {
 
       const { error } = await supabase.from('temperature_readings').upsert(readingData);
       if (error) throw new Error(`Error en lectura ${rd.id}: ${error.message}`);
-      console.log(`  ✔ Lectura cargada (${rd.value}°C) para equipo ${rd.equipment_id}`);
+      readingsCount++;
     }
+    console.log(`  ✔ ${readingsCount} lecturas cargadas (${readings.length} generadas)`);
 
     // 8. Cargar Incidentes
     console.log('\nCargando incidentes y justificaciones HACCP...');
+    let incidentsCount = 0;
+    let openCount = 0;
     for (const inc of incidents) {
       const profile = usersToCreate.find(u => u.id === inc.resolved_by);
       const actualResolvedById = profile ? emailToUserId.get(profile.email) : null;
@@ -496,8 +673,12 @@ async function seed() {
 
       const { error } = await supabase.from('incidents').upsert(incidentData);
       if (error) throw new Error(`Error en incidente ${inc.id}: ${error.message}`);
-      console.log(`  ✔ Incidente cargado: [${inc.status.toUpperCase()}] ${inc.description}`);
+      incidentsCount++;
+      if (inc.status === 'open') openCount++;
     }
+    console.log(
+      `  ✔ ${incidentsCount} incidentes cargados (${openCount} abiertos, ${incidentsCount - openCount} resueltos)`
+    );
 
     console.log('\n\x1b[32m✔ ✔ ¡BASE DE DATOS POPULADA Y SEED COMPLETADO EXITOSAMENTE! ✔ ✔\x1b[0m\n');
     console.log('Cuentas de prueba (contraseña de usuarios nuevos: \x1b[36mPassword123!\x1b[0m):');

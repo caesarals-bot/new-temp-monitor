@@ -125,6 +125,40 @@ export async function countReadingsTodayByLocation(
   return { count, error };
 }
 
+/**
+ * Lista las lecturas de una sede registradas en los últimos 7 días (desde
+ * `now - 7d`). Reusa el patrón de 2 queries por location (ADR-007). Alimenta
+ * las métricas del dashboard (tendencia, cumplimiento, promedios).
+ */
+export async function getReadingsLast7Days(
+  locationId: string,
+  now: Date = new Date()
+): Promise<{ data: TemperatureReading[] | null; error: PostgrestError | null }> {
+  const equipmentRes = await supabase.from('equipment').select('id').eq('location_id', locationId);
+
+  if (equipmentRes.error) {
+    return { data: null, error: equipmentRes.error };
+  }
+
+  const equipmentIds = (equipmentRes.data ?? []).map((e) => e.id);
+
+  if (equipmentIds.length === 0) {
+    return { data: [], error: null };
+  }
+
+  const since = new Date(now);
+  since.setDate(since.getDate() - 7);
+
+  const { data, error } = await supabase
+    .from('temperature_readings')
+    .select('*')
+    .in('equipment_id', equipmentIds)
+    .gte('recorded_at', since.toISOString())
+    .order('recorded_at', { ascending: false });
+
+  return { data, error };
+}
+
 export async function getReading(
   readingId: string
 ): Promise<{ data: TemperatureReading | null; error: PostgrestError | null }> {
