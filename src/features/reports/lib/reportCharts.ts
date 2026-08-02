@@ -67,11 +67,14 @@ export function buildEquipmentSeries(
     seriesMap.set(r.equipment_id, points);
   }
 
-  return filtered.map((eq) => ({
-    equipmentId: eq.id,
-    name: eq.name,
-    points: (seriesMap.get(eq.id) ?? []).sort((a, b) => a.ts.localeCompare(b.ts)),
-  }));
+  // Solo equipos con lecturas (evita series vacías que ensucian el chart).
+  return filtered
+    .filter((eq) => (seriesMap.get(eq.id) ?? []).length > 0)
+    .map((eq) => ({
+      equipmentId: eq.id,
+      name: eq.name,
+      points: (seriesMap.get(eq.id) ?? []).sort((a, b) => a.ts.localeCompare(b.ts)),
+    }));
 }
 
 /**
@@ -108,4 +111,43 @@ export function buildDailyBand(readings: TemperatureReading[]): DailyBandPoint[]
     .sort((a, b) => a.date.localeCompare(b.date));
 
   return points;
+}
+
+export interface IncidentDailyPoint {
+  /** Fecha en formato YYYY-MM-DD. */
+  date: string;
+  /** Etiqueta corta para el eje X (ej: "24/07"). */
+  label: string;
+  open: number;
+  resolved: number;
+}
+
+/**
+ * Serie de incidentes por día (abiertos y resueltos). Da la evolución de
+ * incidentes en el período.
+ */
+export function buildIncidentDailySeries(
+  incidents: { status: 'open' | 'resolved'; created_at: string | null }[]
+): IncidentDailyPoint[] {
+  const byDay = new Map<string, { open: number; resolved: number }>();
+  for (const inc of incidents) {
+    if (!inc.created_at) continue;
+    const d = new Date(inc.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+      d.getDate()
+    ).padStart(2, '0')}`;
+    const entry = byDay.get(key) ?? { open: 0, resolved: 0 };
+    if (inc.status === 'open') entry.open++;
+    else entry.resolved++;
+    byDay.set(key, entry);
+  }
+
+  return Array.from(byDay.entries())
+    .map(([date, counts]) => ({
+      date,
+      label: `${date.slice(8, 10)}/${date.slice(5, 7)}`,
+      open: counts.open,
+      resolved: counts.resolved,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }

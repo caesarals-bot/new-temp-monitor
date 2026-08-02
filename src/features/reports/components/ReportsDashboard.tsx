@@ -3,7 +3,6 @@ import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import type { UseReportReturn } from '../hooks/useReport';
 import { ReportFiltersBar } from './ReportFilters';
 import { ReadingsTable } from './ReadingsTable';
-import { TemperatureChart } from './TemperatureChart';
 import { VariationCharts } from './VariationCharts';
 import { ComplianceSummaryCard, IncidentSummaryCard } from './ComplianceSummary';
 import { PdfExportButton } from './PdfExportButton';
@@ -17,7 +16,8 @@ export interface ReportsDashboardProps {
  *
  * 1. Filtros.
  * 2. Resumen (cumplimiento + incidentes) + selector de equipo.
- * 3. Gráficos de temperatura (por equipo + variación + banda diaria).
+ * 3. Gráficos de variación (evolución por equipo, temperatura diaria,
+ *    incidentes por día).
  * 4. Detalle: tabla de lecturas (compacta) y lista de incidentes.
  */
 export function ReportsDashboard({ hook }: ReportsDashboardProps) {
@@ -53,13 +53,8 @@ export function ReportsDashboard({ hook }: ReportsDashboardProps) {
     );
   }
 
-  const selectedEquipment =
-    selectedEquipmentId !== null
-      ? (equipmentList.find((e) => e.id === selectedEquipmentId) ?? null)
-      : null;
-
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <ReportFiltersBar
         filters={filters}
         equipmentList={equipmentList}
@@ -73,68 +68,60 @@ export function ReportsDashboard({ hook }: ReportsDashboardProps) {
         </Alert>
       )}
 
-      {/* Resumen + chart principal */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <TemperatureChart ref={chartRef} readings={readings} equipment={selectedEquipment} />
-        </div>
-        <div className="flex flex-col gap-4">
-          <ComplianceSummaryCard summary={compliance} />
-          <IncidentSummaryCard
-            total={incidentSummary.total}
-            resolved={incidentSummary.resolved}
-            open={incidentSummary.open}
-          />
-        </div>
-      </div>
-
-      {/* Selector de equipo + gráficos de variación */}
-      {equipmentList.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium uppercase text-[--color-text-muted]">
-            Equipo en gráficos:
-          </span>
-          <button
-            type="button"
-            onClick={() => setSelectedEquipmentId(null)}
-            className={`rounded-full px-3 py-1 text-xs ${
-              selectedEquipmentId === null
-                ? 'bg-[--color-eucalyptus-bg] text-[--color-eucalyptus]'
-                : 'bg-[--color-surface] text-[--color-text-secondary]'
-            }`}
-          >
-            Ninguno
-          </button>
-          {equipmentList.map((eq) => (
+      {/* Resumen + selector de equipo */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <ComplianceSummaryCard summary={compliance} />
+        <IncidentSummaryCard
+          total={incidentSummary.total}
+          resolved={incidentSummary.resolved}
+          open={incidentSummary.open}
+        />
+        {equipmentList.length > 0 && (
+          <div className="md:col-span-2 flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-medium uppercase text-[--color-text-muted]">Equipo:</span>
             <button
-              key={eq.id}
               type="button"
-              onClick={() => setSelectedEquipmentId(eq.id)}
-              className={`rounded-full px-3 py-1 text-xs ${
-                selectedEquipmentId === eq.id
+              onClick={() => setSelectedEquipmentId(null)}
+              className={`rounded-full px-2.5 py-0.5 text-xs ${
+                selectedEquipmentId === null
                   ? 'bg-[--color-eucalyptus-bg] text-[--color-eucalyptus]'
                   : 'bg-[--color-surface] text-[--color-text-secondary]'
               }`}
             >
-              {eq.name}
+              Todos
             </button>
-          ))}
-        </div>
-      )}
+            {equipmentList.map((eq) => (
+              <button
+                key={eq.id}
+                type="button"
+                onClick={() => setSelectedEquipmentId(eq.id)}
+                className={`rounded-full px-2.5 py-0.5 text-xs ${
+                  selectedEquipmentId === eq.id
+                    ? 'bg-[--color-eucalyptus-bg] text-[--color-eucalyptus]'
+                    : 'bg-[--color-surface] text-[--color-text-secondary]'
+                }`}
+              >
+                {eq.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
+      {/* Gráficos de variación */}
       {readings.length > 0 && (
-        <section aria-label="Variación de temperatura">
-          <VariationCharts
-            readings={readings}
-            equipmentList={equipmentList}
-            selectedEquipmentId={selectedEquipmentId}
-          />
-        </section>
+        <VariationCharts
+          ref={chartRef}
+          readings={readings}
+          equipmentList={equipmentList}
+          incidents={incidents}
+          selectedEquipmentId={selectedEquipmentId}
+        />
       )}
 
       {/* Detalle: tabla de lecturas */}
       <section aria-label="Detalle de lecturas">
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between">
           <h2 className="text-base font-semibold text-[--color-text-primary]">
             Lecturas del período ({readings.length})
           </h2>
@@ -148,7 +135,7 @@ export function ReportsDashboard({ hook }: ReportsDashboardProps) {
         </div>
 
         {isLoading && readings.length === 0 ? (
-          <div className="rounded-md border border-[--color-border] bg-white p-8 text-center text-sm text-[--color-text-muted]">
+          <div className="rounded-md border border-[--color-border] bg-white p-6 text-center text-sm text-[--color-text-muted]">
             Cargando lecturas...
           </div>
         ) : (
@@ -161,13 +148,13 @@ export function ReportsDashboard({ hook }: ReportsDashboardProps) {
         )}
 
         {incidents.length > 0 && (
-          <details className="mt-4 rounded-md border border-[--color-border] bg-white">
-            <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-[--color-text-primary]">
+          <details className="mt-3 rounded-md border border-[--color-border] bg-white">
+            <summary className="cursor-pointer px-4 py-2.5 text-sm font-medium text-[--color-text-primary]">
               Incidentes del período ({incidents.length})
             </summary>
             <ul className="divide-y divide-[--color-border] border-t border-[--color-border] text-sm">
               {incidents.slice(0, 30).map((inc) => (
-                <li key={inc.id} className="px-4 py-3">
+                <li key={inc.id} className="px-4 py-2.5">
                   <p className="font-medium text-[--color-text-primary]">{inc.description}</p>
                   <p className="mt-1 text-xs text-[--color-text-muted]">
                     {new Date(inc.created_at).toLocaleString('es-CL')} —{' '}
