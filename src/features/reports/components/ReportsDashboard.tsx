@@ -4,6 +4,7 @@ import type { UseReportReturn } from '../hooks/useReport';
 import { ReportFiltersBar } from './ReportFilters';
 import { ReadingsTable } from './ReadingsTable';
 import { TemperatureChart } from './TemperatureChart';
+import { VariationCharts } from './VariationCharts';
 import { ComplianceSummaryCard, IncidentSummaryCard } from './ComplianceSummary';
 import { PdfExportButton } from './PdfExportButton';
 
@@ -78,6 +79,14 @@ export function ReportsDashboard({ hook }: ReportsDashboardProps) {
         </div>
       </div>
 
+      {readings.length > 0 && (
+        <VariationCharts
+          readings={readings}
+          equipmentList={equipmentList}
+          selectedEquipmentId={selectedEquipmentId}
+        />
+      )}
+
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-[--color-text-primary]">
           Lecturas del período ({readings.length})
@@ -125,12 +134,14 @@ export function ReportsDashboard({ hook }: ReportsDashboardProps) {
           Cargando lecturas...
         </div>
       ) : (
-        <ReadingsTable
-          readings={pageReadings}
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={setPage}
-        />
+        <div className="max-w-5xl">
+          <ReadingsTable
+            readings={pageReadings}
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={setPage}
+          />
+        </div>
       )}
 
       {incidents.length > 0 && (
