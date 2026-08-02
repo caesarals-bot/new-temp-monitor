@@ -13,7 +13,10 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOrganizationStore } from '@/features/organizations/store/organization.store';
-import { listEquipmentByLocation } from '@/features/equipment/services/equipment.service';
+import {
+  listEquipmentByLocation,
+  listEquipmentByOrganization,
+} from '@/features/equipment/services/equipment.service';
 import { listReadingsReport, listIncidentsForReport } from '../services/reports.service';
 import { isOutOfRange } from '@/features/readings/lib/isOutOfRange';
 import type { Equipment, TemperatureReading } from '@/shared/types/supabase';
@@ -162,11 +165,6 @@ export function useReport(): UseReportReturn {
     setReadings(readingsRes.data ?? []);
     setIncidents(incidentsRes.data ?? []);
 
-    const equipmentIds = new Set<string>();
-    for (const r of readingsRes.data ?? []) {
-      if (r.equipment_id) equipmentIds.add(r.equipment_id);
-    }
-
     let list: Pick<Equipment, 'id' | 'name' | 'min_temp' | 'max_temp'>[] = [];
     if (filters.locationId) {
       const eqRes = await listEquipmentByLocation(filters.locationId);
@@ -179,12 +177,17 @@ export function useReport(): UseReportReturn {
         }));
       }
     } else {
-      list = Array.from(equipmentIds).map((id) => ({
-        id,
-        name: id,
-        min_temp: 0,
-        max_temp: 0,
-      }));
+      // Todas las sedes: traer los equipos de la org para mostrar el nombre
+      // real y el rango (no el id como fallback).
+      const eqRes = await listEquipmentByOrganization(orgId);
+      if (!eqRes.error && eqRes.data) {
+        list = eqRes.data.map((e) => ({
+          id: e.id,
+          name: e.name,
+          min_temp: e.min_temp,
+          max_temp: e.max_temp,
+        }));
+      }
     }
 
     setEquipmentList(list);

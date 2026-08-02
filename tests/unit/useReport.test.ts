@@ -7,6 +7,7 @@ const { mocks } = vi.hoisted(() => {
       listReadingsReport: vi.fn(),
       listIncidentsForReport: vi.fn(),
       listEquipmentByLocation: vi.fn(),
+      listEquipmentByOrganization: vi.fn(),
     },
   };
 });
@@ -29,6 +30,7 @@ vi.mock('@/features/reports/services/reports.service', () => ({
 
 vi.mock('@/features/equipment/services/equipment.service', () => ({
   listEquipmentByLocation: mocks.listEquipmentByLocation,
+  listEquipmentByOrganization: mocks.listEquipmentByOrganization,
 }));
 
 import { useReport } from '@/features/reports/hooks/useReport';
@@ -72,6 +74,7 @@ beforeEach(() => {
   mocks.listReadingsReport.mockResolvedValue({ data: [], error: null });
   mocks.listIncidentsForReport.mockResolvedValue({ data: [], error: null });
   mocks.listEquipmentByLocation.mockResolvedValue({ data: [], error: null });
+  mocks.listEquipmentByOrganization.mockResolvedValue({ data: [], error: null });
 });
 
 describe('useReport · fetching', () => {

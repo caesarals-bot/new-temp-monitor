@@ -31,6 +31,34 @@ export async function listEquipmentByLocation(
   return { data, error };
 }
 
+/**
+ * Lista todos los equipos de una organización (todas las sedes). Útil cuando
+ * un reporte no filtra por sede y necesita nombres/rangos reales por equipo.
+ *
+ * Patrón ADR-007: 2 queries (locations de la org → equipos con `in`).
+ */
+export async function listEquipmentByOrganization(
+  organizationId: string
+): Promise<{ data: Equipment[] | null; error: PostgrestError | null }> {
+  const { data: locations, error: locError } = await supabase
+    .from('locations')
+    .select('id')
+    .eq('organization_id', organizationId);
+
+  if (locError) return { data: null, error: locError };
+
+  const locationIds = (locations ?? []).map((l) => l.id);
+  if (locationIds.length === 0) return { data: [], error: null };
+
+  const { data, error } = await supabase
+    .from('equipment')
+    .select('*')
+    .in('location_id', locationIds)
+    .order('created_at', { ascending: true });
+
+  return { data, error };
+}
+
 export async function getEquipment(
   equipmentId: string
 ): Promise<{ data: Equipment | null; error: PostgrestError | null }> {
