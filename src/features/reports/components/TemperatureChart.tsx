@@ -28,9 +28,9 @@ export const TemperatureChart = forwardRef<HTMLDivElement, TemperatureChartProps
       return (
         <div
           ref={ref}
-          className="rounded-md border border-[--color-border] bg-white p-8 text-center text-sm text-[--color-text-muted]"
+          className="flex min-h-[200px] items-center justify-center rounded-md border border-dashed border-[--color-border] bg-white p-4 text-center text-sm text-[--color-text-muted]"
         >
-          Selecciona un equipo para ver el gráfico.
+          Selecciona un equipo arriba para ver su evolución en detalle.
         </div>
       );
     }
@@ -53,7 +53,7 @@ export const TemperatureChart = forwardRef<HTMLDivElement, TemperatureChartProps
       return (
         <div
           ref={ref}
-          className="rounded-md border border-[--color-border] bg-white p-8 text-center text-sm text-[--color-text-muted]"
+          className="flex min-h-[200px] items-center justify-center rounded-md border border-dashed border-[--color-border] bg-white p-4 text-center text-sm text-[--color-text-muted]"
         >
           Sin lecturas para este equipo en el período seleccionado.
         </div>
@@ -72,7 +72,7 @@ export const TemperatureChart = forwardRef<HTMLDivElement, TemperatureChartProps
             {equipment.min_temp}°C a {equipment.max_temp}°C
           </span>
         </div>
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={200}>
           <LineChart data={data} margin={{ top: 10, right: 16, bottom: 0, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#D8E6E2" />
             <XAxis

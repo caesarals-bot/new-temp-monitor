@@ -99,7 +99,7 @@ export function VariationCharts({
               Sin lecturas para mostrar.
             </p>
           ) : (
-            <div className="h-56 w-full">
+            <div className="h-40 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={multiLineData}
@@ -157,7 +157,7 @@ export function VariationCharts({
               Sin lecturas para mostrar.
             </p>
           ) : (
-            <div className="h-56 w-full">
+            <div className="h-40 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={dailyBand} margin={{ top: 5, right: 10, bottom: 0, left: -18 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
