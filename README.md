@@ -120,16 +120,27 @@ Detalles completos en [`files/AGENT.md`](./files/AGENT.md).
 
 ## Estado del proyecto
 
-**Última tarea cerrada:** HOTFIX-002 — Platform admin: acceso al panel y datos reales
-**Tests:** 75 tests de lógica pura pasando (los tests de hooks/componentes requieren fix de tooling, ver CHANGELOG)
+**Última sesión:** 2026-08-02 — Semana de datos demo + métricas de dashboard + rediseño de reportes
+**Tests:** 75 tests de lógica pura pasando + 16 nuevos (dashboardMetrics, reportCharts) = ~91 (los tests de hooks/componentes requieren fix de tooling, ver CHANGELOG)
 **Build:** ✅ `pnpm build` limpio
 **Deploy:** ✅ Vercel (rama `main` → `git-main`) — se actualiza con cada push a origin
+
+**Datos demo (seed):**
+
+- `pnpm db:seed` (con `SEED_ENV=prod` para la BD real) genera **1 semana de lecturas** deterministas: 1008 lecturas (12/equipo/día), 168 IoT (farmacia) y el resto manuales, con snapshot HACCP, más **8 incidentes** (3 abiertos, 5 resueltos). Idempotente por upsert.
+- Dashboard de usuario con métricas 7 días: tendencia (LineChart), % de cumplimiento, promedio por equipo, mín/máx del día e incidentes abiertos/resueltos.
 
 **Módulo admin funcional:**
 
 - `/admin/organizations` — lista cross-tenant con filtros (estado/plan/rubro), **cambiar estado** y **cambiar plan** (plan_type + max_locations con confirmación).
 - `/admin/organizations/:id` — detalle: sedes, usuarios, equipos, lecturas e incidentes (solo metadata, sin datos de temperatura).
 - `/admin/metrics` — KPIs globales + distribución por estado y plan + actualización en tiempo real (Realtime).
+
+**Reportes (rediseñados):**
+
+- Fila compacta de resumen (cumplimiento + incidentes) + selector de equipo.
+- 3 gráficos compactos: evolución por equipo (con nombre real), temperatura diaria (promedio/mín/máx) e incidentes por día (abiertos/resueltos).
+- Tabla compacta (max-h + scroll) y lista de incidentes colapsable. Nombres de equipos reales incluso con "todas las sedes".
 
 **Cuentas de prueba:** todas las del seed usan `Password123!`. Platform admin: `admin@tempmonitor.dev`.
 
